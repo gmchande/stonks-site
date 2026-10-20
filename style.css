@@ -368,6 +368,10 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   h2 { font-size: 27px; }
   .wide { font-size: 15px; }
   .popup { padding: 14px 14px 8px; }
+  .pop-head { gap: 8px; }
+  .status { font-size: 11px; letter-spacing: 0.06em; }
+  .listing { letter-spacing: 0.06em; }
+  .head-tools { gap: 0; }
   .rows { margin: 0 -8px; }
   .row { padding: 7px 8px; grid-template-columns: minmax(0, 1fr) 56px 84px; gap: 8px; }
   .row canvas { width: 56px; }

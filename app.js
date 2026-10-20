@@ -505,6 +505,7 @@
   }
   addEventListener("scroll", () => { if (!dayFrame) dayFrame = requestAnimationFrame(followScroll); }, { passive: true });
   reducedMotion.addEventListener("change", setDayMode);
+  addEventListener("load", setDayMode); // a restored scroll lands mid-day
 
   // ---- The pill: the hero's stock, in the look of the page.
 
@@ -622,7 +623,7 @@
   // ---- Page cells: headings, sprites, the hero's ground
 
   function paintBlocks() {
-    document.querySelectorAll(".blocks[data-text]").forEach((node) => {
+    document.querySelectorAll(".blocks[data-cell]").forEach((node) => {
       const cell = Number(node.dataset.cell);
       const small = innerWidth <= 640 && cell > 8 ? Math.round(cell * 0.62) : cell;
       node.innerHTML = Cells.blocksSVG(node.dataset.text, small, COL.fg, 5, 0.06);
