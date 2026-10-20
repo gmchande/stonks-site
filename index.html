@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stonks: your stocks in the Omarchy bar</title>
+<meta name="description" content="A free stock watchlist plugin for the Omarchy 4 shell: today's move in your bar, and a chart you can scrub a click away. No account and no API key.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 6' shape-rendering='crispEdges'%3E%3Cg fill='%239ece6a'%3E%3Crect x='0' y='5' width='1' height='1'/%3E%3Crect x='2' y='2' width='1' height='4'/%3E%3Crect x='4' y='4' width='1' height='2'/%3E%3Crect x='6' y='1' width='1' height='5'/%3E%3Crect x='8' y='0' width='1' height='6'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="Stonks, back to the top">
+    <span class="mark" data-mark aria-hidden="true"></span>
+    <span>STONKS</span>
+  </a>
+  <nav>
+    <a href="https://github.com/gmchande/omarchy-stonks">GitHub</a>
+    <a class="btn btn-small" href="#install">Install</a>
+  </nav>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <canvas class="scatter" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow">A stock watchlist for the Omarchy 4 shell</p>
+      <h1 class="wordmark"><span class="blocks" data-text="STONKS" data-cell="16" aria-hidden="true"></span><span class="sr">Stonks</span></h1>
+      <p class="lead">Today's move in your bar, and a chart you can scrub a click away.</p>
+      <p>Stocks, ETFs, indexes, and crypto, drawn in your theme's colours. Free, with no account and no API key.</p>
+      <div class="term" data-copy>
+        <div class="term-bar"><span>INSTALL</span><button type="button" class="copy">Copy</button></div>
+        <pre><code><span class="prompt" aria-hidden="true">$ </span>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span><span class="cursor" aria-hidden="true"></span></code></pre>
+      </div>
+      <p class="fine">Needs Omarchy 4. Omarchy asks you to confirm, then which part of the bar gets the pill.</p>
+    </div>
+
+    <figure class="demo-wrap">
+      <div class="demo-tag" aria-hidden="true">DEMO · MADE-UP PRICES</div>
+      <div class="popup" id="demo" aria-label="A working copy of Stonks' popup, with made-up symbols and prices" role="group">
+        <div class="pop-head">
+          <button type="button" class="animal" aria-label="Replay the chart"></button>
+          <span class="status" aria-live="off"></span>
+          <span class="head-tools">
+            <button type="button" class="look" aria-label="Switch between smooth and retro"></button>
+            <button type="button" class="help" aria-label="Show the demo's keys">?</button>
+          </span>
+        </div>
+        <div class="listing"></div>
+        <div class="hero-row">
+          <div class="price" aria-live="off"></div>
+          <div class="change-col">
+            <button type="button" class="change" aria-label="Show the change as a percent, an amount, or since the open"></button>
+            <span class="change-cap"></span>
+          </div>
+        </div>
+        <canvas class="chart" tabindex="0" role="slider" aria-label="Day chart, made-up prices. Left and right arrows scrub." aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"></canvas>
+        <div class="ranges" role="group" aria-label="Chart range"></div>
+        <div class="info"></div>
+        <div class="breadth"><span>ALL</span><span>TODAY</span><canvas class="breadth-rule" aria-hidden="true"></canvas></div>
+        <div class="rows" role="group" aria-label="Made-up watchlist"></div>
+        <div class="sheet" hidden>
+          <p class="sheet-title">KEYS · THIS DEMO</p>
+          <dl>
+            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one chart step</dd>
+            <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the chart range</dd>
+            <dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move the selection</dd>
+            <dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd>
+            <dt><kbd>1</kbd>–<kbd>4</kbd></dt><dd>Show that row's chart</dd>
+            <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
+            <dt><kbd>c</kbd></dt><dd>Percent, amount, or since the open</dd>
+            <dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd>
+            <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
+          </dl>
+        </div>
+      </div>
+      <figcaption>Made-up symbols and prices. Point at the chart to scrub back through the day; click the bull, or the bear on a down moment, to replay. Press <kbd>?</kbd> for keys.</figcaption>
+    </figure>
+  </div>
+  <canvas class="skyline" aria-hidden="true"></canvas>
+</section>
+
+<section class="stage" id="bar">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="1" data-cell="6" aria-hidden="true"></span><span class="sr">1</span><span>IN YOUR BAR</span></p>
+  <h2>One glance at the bar.</h2>
+  <p class="wide">The pill shows today's move for the stock you last looked at. Scroll over it to step through your list. Left-click for the popup, right-click for the window, middle-click to change its form, and drag it along the bar.</p>
+
+  <div class="bar-demo">
+    <div class="fake-bar" aria-hidden="true">
+      <span class="ws"><b>1</b><i>2</i><i>3</i><i>4</i></span>
+      <span class="ws-right"><i></i><i></i><i></i></span>
+    </div>
+    <button type="button" class="pill" id="pill" aria-label="Stonks' pill with made-up prices. Click to change its form; scroll to step through the list."></button>
+  </div>
+  <div class="forms" role="group" aria-label="The pill's four forms">
+    <button type="button" data-form="sparkline">Sparkline</button>
+    <button type="button" data-form="arrow">Arrow</button>
+    <button type="button" data-form="text">Text</button>
+    <button type="button" data-form="icon">Mark</button>
+  </div>
+  <p class="note">Here, scroll over the pill to step through the demo's made-up stocks, and click it to change its form. In your bar, that's a middle-click. The mark is a little chart that climbs on an up day and falls on a down one.</p>
+</section>
+
+<section class="stage" id="label">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="2" data-cell="6" aria-hidden="true"></span><span class="sr">2</span><span>ON THE LABEL</span></p>
+  <h2>What's in the cartridge.</h2>
+  <div class="cart">
+    <ul class="label-list">
+      <li>Click the pill for the day's chart and scrub it with the pointer, or pick a range from a week to all time.</li>
+      <li>Pre-market, after-hours, and overnight prices, and when the market opens or closes.</li>
+      <li>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency.</li>
+      <li>Lists of your own, such as a portfolio or a sector.</li>
+      <li>A tiled window too: the popup's chart and rows at the window's width.</li>
+      <li>An old price says "As of" and its time. A refresh that fails puts a "!" on the pill.</li>
+      <li>No account and no API key.</li>
+    </ul>
+    <div class="not-label">
+      <p class="not-title">NOT IN THE CARTRIDGE</p>
+      <p>Stonks doesn't track holdings, send price alerts, or convert currencies.</p>
+    </div>
+  </div>
+</section>
+
+<section class="stage" id="looks">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="3" data-cell="6" aria-hidden="true"></span><span class="sr">3</span><span>SMOOTH OR RETRO</span></p>
+  <h2>Two looks. One click.</h2>
+  <p class="wide">Retro draws the price in block digits and the charts in pixel columns, the way Omarchy draws its logo. Smooth draws them in lines. Click the small chart icon at the top right of the popup to switch, or press <kbd>s</kbd>.</p>
+  <figure class="shot">
+    <img src="img/preview.webp" width="2680" height="1340" loading="lazy" alt="Stonks in the Omarchy bar: the pill shows Apple's symbol, sparkline, and change, and under it two popups side by side. On the left, smooth, scrubbed back to 10:15 when the day was up, with the bull; on the right, retro, on the latest price of a down day, with the bear.">
+  </figure>
+</section>
+
+<section class="stage" id="themes">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="4" data-cell="6" aria-hidden="true"></span><span class="sr">4</span><span>SELECT YOUR THEME</span></p>
+  <h2>It wears your theme.</h2>
+  <p class="wide">Both looks draw in your theme's colours, light themes too: up in its green and down in its red. Where a theme's pair is missing, too alike, or too faint, Stonks uses its own green and red.</p>
+  <div class="select">
+    <div class="theme-grid" role="group" aria-label="Themes"></div>
+    <figure class="theme-shot">
+      <img alt="" width="944" height="1308">
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="stage" id="keys">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="5" data-cell="6" aria-hidden="true"></span><span class="sr">5</span><span>MOVE LIST</span></p>
+  <h2>Play it with the keys.</h2>
+  <p class="wide">Press <kbd>?</kbd> in the popup for a sheet of the everyday keys. A few of them:</p>
+  <dl class="moves">
+    <div><dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move the selection</dd></div>
+    <div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Scrub one chart step</dd></div>
+    <div><dt><kbd>[</kbd><kbd>]</kbd></dt><dd>Change the chart range</dd></div>
+    <div><dt><kbd>p</kbd></dt><dd>Replay the chart</dd></div>
+    <div><dt><kbd>a</kbd></dt><dd>Search and add a symbol</dd></div>
+    <div><dt><kbd>x</kbd></dt><dd>Remove the selected row</dd></div>
+    <div><dt><kbd>u</kbd></dt><dd>Undo the last removal</dd></div>
+    <div><dt><kbd>w</kbd></dt><dd>Open the list menu</dd></div>
+    <div><dt><kbd>,</kbd><kbd>.</kbd></dt><dd>Previous or next list</dd></div>
+    <div><dt><kbd>c</kbd></dt><dd>Change as a percent, an amount, or since the open</dd></div>
+    <div><dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd></div>
+    <div><dt><kbd>r</kbd></dt><dd>Refresh</dd></div>
+  </dl>
+  <p class="note">Every key is in the <a href="https://github.com/gmchande/omarchy-stonks#keys">README's table</a>.</p>
+</section>
+
+<section class="stage" id="rules">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="6" data-cell="6" aria-hidden="true"></span><span class="sr">6</span><span>HOUSE RULES</span></p>
+  <h2>No tricks.</h2>
+  <dl class="rules">
+    <div><dt>PRICES</dt><dd>Quotes, charts, and search come from Yahoo's unofficial endpoints, and overnight prices from Robinhood. Either may change or stop without notice.</dd></div>
+    <div><dt>DELAYS</dt><dd>Yahoo delays many exchanges' quotes, London's and Tokyo's among them, by up to 30 minutes. Any price more than two minutes old while its market trades says "As of" and its time.</dd></div>
+    <div><dt>RUNS</dt><dd><code>curl</code> for every request, to <code>query1.finance.yahoo.com</code>, <code>query2.finance.yahoo.com</code>, and <code>api.robinhood.com</code>. Nothing else. <code>omarchy restart shell</code> only when you click the update notice.</dd></div>
+    <div><dt>FILES</dt><dd>Your lists and settings in <code>~/.config/omarchy/grvc.stonks.json</code>, the last quotes in <code>~/.cache/grvc.stonks/quotes.json</code>.</dd></div>
+    <div><dt>UPDATES</dt><dd>Never by itself.</dd></div>
+    <div><dt>ADVICE</dt><dd>None. Stonks isn't investment advice, and isn't affiliated with Yahoo or Robinhood.</dd></div>
+  </dl>
+</section>
+
+<section class="finale" id="install">
+  <div class="cabinet">
+    <span class="sprite big-bull" data-sprite="bull" aria-hidden="true"></span>
+    <div class="finale-mid">
+      <h2 class="freeplay"><span class="blocks" data-text="FREE PLAY" data-cell="10" aria-hidden="true"></span><span class="sr">Free play</span></h2>
+      <p class="coin">No account. No API key. No coin. MIT licence.</p>
+    </div>
+    <span class="sprite big-bear" data-sprite="bear" aria-hidden="true"></span>
+  </div>
+  <div class="term" data-copy>
+    <div class="term-bar"><span>INSTALL · NEEDS OMARCHY 4</span><button type="button" class="copy">Copy</button></div>
+    <pre><code><span class="prompt" aria-hidden="true">$ </span>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span></code></pre>
+  </div>
+  <ol class="steps">
+    <li>Omarchy warns that plugins run unsandboxed and asks you to confirm the clone.</li>
+    <li>It asks which bar section gets the pill. The centre is the default.</li>
+    <li>Click the pill.</li>
+  </ol>
+  <p class="fine center">To read the code first, leave out <code class="nw">--enable</code>, say no when asked to enable it, and run <code>omarchy plugin enable grvc.stonks</code> when you're ready.</p>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p><a href="https://github.com/gmchande/omarchy-stonks">GitHub</a> · <a href="https://github.com/gmchande/omarchy-stonks#readme">README</a> · <a href="https://github.com/gmchande/omarchy-stonks/issues/new?template=bug.yml">Report a bug</a></p>
+  <p>Stonks is MIT licensed, by Gaurav Chande. It isn't investment advice. Every price this page draws itself is made up.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
