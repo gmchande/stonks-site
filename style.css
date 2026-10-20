@@ -196,8 +196,9 @@ button { font: inherit; color: inherit; }
 .row:hover { background: var(--surface); }
 .row[aria-current="true"] { background: var(--raise); border-left-color: var(--fg); }
 .row.selected { outline: 1px dashed var(--faint); outline-offset: -1px; }
-.row .sym { color: var(--fg); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; }
-.row .name { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .who { min-width: 0; }
+.row .sym { display: block; color: var(--fg); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; }
+.row .name { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row .nums { text-align: right; font-size: 14px; line-height: 1.35; }
 .row .nums span { display: block; color: var(--fg); }
 .row canvas { width: 72px; height: 24px; display: block; }
@@ -397,3 +398,20 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .finale { padding-top: 88px; }
   .skyline { height: 80px; margin-top: 48px; }
 }
+
+/* A short landscape screen: the clock beside the popup, the chart lower,
+   so the whole day fits while it is pinned. */
+@media (max-height: 600px) and (orientation: landscape) {
+  .day-sticky { flex-direction: row; gap: 24px; padding: 8px 16px; }
+  .day-clock { align-items: flex-start; }
+  .popup.compact { padding: 10px 14px 6px; }
+  .popup.compact .listing { margin: 4px 0; }
+  .popup.compact .strip { margin: 2px 0 6px; }
+  .popup.compact .chart { height: 96px; }
+}
+
+/* Without JavaScript: the headings' own words, and no empty demos. */
+html:not(.js) .blocks + .sr { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
+html:not(.js) .wordmark .sr { font-size: 56px; line-height: 1.1; color: var(--fg); }
+html:not(.js) .demo-wrap, html:not(.js) .day-track, html:not(.js) .day-hint, html:not(.js) .copy,
+html:not(.js) .bar-demo, html:not(.js) .forms, html:not(.js) .select { display: none; }

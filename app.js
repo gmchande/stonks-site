@@ -120,11 +120,12 @@
       this.holdScale = holdScale;
       this.sym = 0;
       this.sel = 0;
-      this.range = symbols.map(() => "1D"); // every stock keeps its own range
+      this.range = "1D"; // every stock shows the range picked
       this.changeMode = 0;
       this.scrub = -1;
       this.reveal = 1;
       this.replayFrame = null;
+      this.scrubMinute = null;
       this.build();
       Look.on(() => this.render());
     }
@@ -153,7 +154,7 @@
         <div class="info"></div>
         <div class="breadth"><span>ALL</span><span>TODAY</span><canvas class="breadth-rule" aria-hidden="true"></canvas></div>
         <div class="rows" role="group" aria-label="Made-up watchlist">${this.symbols.map((s) => `
-          <button type="button" class="row"><span><span class="sym">${s.sym}</span><br><span class="name">${s.name}</span></span><canvas aria-hidden="true"></canvas><span class="nums"><span></span><b></b></span></button>`).join("")}
+          <button type="button" class="row"><span class="who"><span class="sym">${s.sym}</span><span class="name">${s.name}</span></span><canvas aria-hidden="true"></canvas><span class="nums"><span></span><b></b></span></button>`).join("")}
         </div>
         <div class="sheet" hidden>
           <p class="sheet-title">KEYS · THIS DEMO</p>
@@ -188,7 +189,10 @@
         el.help.addEventListener("click", () => this.toggleSheet());
         el.sheet.addEventListener("click", () => this.toggleSheet(false));
         el.ranges.addEventListener("click", (e) => { const b = e.target.closest("[data-range]"); if (b) this.setRange(b.dataset.range); });
-        [...el.rows.children].forEach((row, i) => row.addEventListener("click", () => { this.sel = i; this.setSymbol(i); }));
+        [...el.rows.children].forEach((row, i) => {
+          row.addEventListener("click", () => { this.sel = i; this.setSymbol(i); });
+          row.addEventListener("focus", () => { if (this.sel !== i) { this.sel = i; this.renderRows(); } });
+        });
       }
     }
 
@@ -198,7 +202,7 @@
     series() {
       const s = this.feat();
       const q = this.quote();
-      const key = this.range[this.sym];
+      const key = this.range;
       if (key === "1D") return { s, q, key, pts: q.prints, base: s.prev, day: true };
       const pts = rangeSeries(s, key, q);
       return { s, q, key, pts, base: pts[0].v, day: false };
@@ -224,6 +228,7 @@
       const retro = Look.retro;
       const el = this.el;
       const scrubbed = this.scrub >= 0 && pts[this.scrub];
+      this.scrubMinute = scrubbed && day ? pts[this.scrub].m : null;
       let shown, status;
       if (scrubbed) {
         const read = day ? Market.readingAt(pts, this.scrub, this.clock) : { v: pts[this.scrub].v, status: `At ${rangeLabel(key, pts[this.scrub])}` };
@@ -325,18 +330,27 @@
         kids[k * 4 + 3].textContent = hi === null ? "" : money(hi);
         Cells.drawRule(kids[k * 4 + 2], retro, [[1, COL.fg, 0.14]], lo === null ? null : (q.price - lo) / (hi - lo || 1));
       });
-      const pcts = this.symbols.map((x) => Market.quoteAt(x, this.clock).pct);
+      const pcts = this.symbols.map((x) => this.rowReading(x).pct);
       const ups = pcts.filter((p) => tone(p) === "up").length;
       const downs = pcts.filter((p) => tone(p) === "down").length;
       const n = pcts.length;
       Cells.drawRule(this.el.breadth, retro, [[ups / n, COL.up, 1], [(n - ups - downs) / n, COL.fg, 0.14], [downs / n, COL.down, 1]]);
     }
 
+    // A row's figures: today's, or, while the day is scrubbed, its price at
+    // that moment, as Stonks' rows follow the pointer.
+    rowReading(s) {
+      const q = Market.quoteAt(s, this.clock);
+      if (this.scrubMinute === null) return q;
+      const v = Market.priceAt(q.prints, s.prev, this.scrubMinute);
+      return { prints: q.prints, price: v, pct: ((v - s.prev) / s.prev) * 100 };
+    }
+
     renderRows() {
       const retro = Look.retro;
       [...this.el.rows.children].forEach((row, i) => {
         const s = this.symbols[i];
-        const q = Market.quoteAt(s, this.clock);
+        const q = this.rowReading(s);
         row.setAttribute("aria-current", String(i === this.sym));
         row.classList.toggle("selected", i === this.sel && i !== this.sym);
         const nums = row.querySelector(".nums");
@@ -357,17 +371,17 @@
     }
     setRange(key) {
       this.stopReplay();
-      this.range[this.sym] = key;
+      this.range = key;
       this.scrub = -1;
       this.render();
     }
     stepRange(d) {
       const keys = RANGES.map((r) => r[0]);
-      const k = keys.indexOf(this.range[this.sym]);
+      const k = keys.indexOf(this.range);
       this.setRange(keys[Math.max(0, Math.min(keys.length - 1, k + d))]);
     }
     cycleChange() {
-      if (this.range[this.sym] !== "1D") return;
+      if (this.range !== "1D") return;
       const canOpen = this.quote().open !== null;
       this.changeMode = (this.changeMode + 1) % (canOpen ? 3 : 2);
       this.render();
@@ -445,6 +459,8 @@
       else if (k === "[" || k === "]") this.stepRange(k === "[" ? -1 : 1);
       else if (["ArrowUp", "k", "ArrowDown", "j"].includes(k)) {
         this.sel = (this.sel + (k === "ArrowUp" || k === "k" ? -1 : 1) + this.symbols.length) % this.symbols.length;
+        // Keep focus on the selected row, so Enter on it shows that row.
+        if (e.target.classList.contains("row")) this.el.rows.children[this.sel].focus();
         this.renderRows();
       } else if ((k === "Enter" || k === " ") && !onButton) this.setSymbol(this.sel);
       else if (/^[1-4]$/.test(k)) { this.sel = Number(k) - 1; this.setSymbol(this.sel); }

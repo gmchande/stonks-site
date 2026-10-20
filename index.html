@@ -48,7 +48,6 @@
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "author": { "@type": "Person", "name": "Gaurav Chande" },
-  "codeRepository": "https://github.com/gmchande/omarchy-stonks",
   "installUrl": "https://github.com/gmchande/omarchy-stonks",
   "potentialAction": {
     "@type": "InstallAction",
@@ -165,7 +164,7 @@
   <h2>What's in the cartridge.</h2>
   <div class="cart">
     <ul class="label-list">
-      <li>Click the pill for the day's chart and scrub it with the pointer, or pick a range from a week to all time.</li>
+      <li>Click the pill for the day's chart and scrub it with the pointer. Charts go from one day to all time.</li>
       <li>Pre-market, after-hours, and overnight prices, and when the market opens or closes.</li>
       <li>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency.</li>
       <li>A tiled window too: the popup's chart and rows at the window's width.</li>
@@ -186,9 +185,9 @@
     <div>
       <p class="wide">All holds every symbol you follow. Your own lists, such as a portfolio or a sector, hold some of them. Click the list's name to switch lists, start one, or manage them.</p>
       <ul class="plain-list">
-        <li>Ctrl-click a row to tick the lists it's in.</li>
+        <li>Ctrl-click a row to choose the lists it's in.</li>
         <li>Removing a symbol from All removes it everywhere.</li>
-        <li>Removed one by mistake? A click on the note in the footer puts it back.</li>
+        <li>Removed one by mistake? The footer says what you removed; click it to bring the row back.</li>
         <li>Sort by symbol, name, or change, or keep your own order.</li>
       </ul>
     </div>
@@ -250,9 +249,10 @@
   <dl class="rules">
     <div><dt>PRICES</dt><dd>Quotes, charts, and search come from Yahoo's unofficial endpoints, and overnight prices from Robinhood. Either may change or stop without notice.</dd></div>
     <div><dt>DELAYS</dt><dd>Yahoo delays many exchanges' quotes, London's and Tokyo's among them, by up to 30 minutes. Any price more than two minutes old while its market trades says "As of" and its time.</dd></div>
-    <div><dt>RUNS</dt><dd><code>curl</code> for every request, to <code>query1.finance.yahoo.com</code>, <code>query2.finance.yahoo.com</code>, and <code>api.robinhood.com</code>. Nothing else. <code>omarchy restart shell</code> only when you click the update notice.</dd></div>
+    <div><dt>RUNS</dt><dd><code>curl</code> for every request; <code>omarchy restart shell</code> only when you click the notice that an update is on disk; and <code>omarchy plugin update grvc.stonks</code> in a terminal only when you click the note that a newer Stonks is out.</dd></div>
+    <div><dt>SITES</dt><dd><code>query1.finance.yahoo.com</code> for quotes, charts, and the market cap and P/E; <code>query2.finance.yahoo.com</code> for search; <code>api.robinhood.com</code> for overnight prices and which stocks trade overnight; and <code>raw.githubusercontent.com</code> for the newest version number, as the shell starts and then once a day. Nothing else.</dd></div>
     <div><dt>FILES</dt><dd>Your lists and settings in <code>~/.config/omarchy/grvc.stonks.json</code>, the last quotes in <code>~/.cache/grvc.stonks/quotes.json</code>.</dd></div>
-    <div><dt>UPDATES</dt><dd>Never by itself.</dd></div>
+    <div><dt>UPDATES</dt><dd>Never by itself. When a newer version is out, the footer says so for 5 seconds.</dd></div>
     <div><dt>ADVICE</dt><dd>None. Stonks isn't investment advice, and isn't affiliated with Yahoo or Robinhood.</dd></div>
   </dl>
 </section>

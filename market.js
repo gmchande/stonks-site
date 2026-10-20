@@ -143,5 +143,13 @@ window.Market = (() => {
     return { v: p.v, status: `At ${hhmm(isClose ? CLOSE : p.m)} · ${PHASES[phase]}` };
   }
 
-  return { PRE, OPEN, CLOSE, POST_END, BELLS, SYMBOLS, rng, round2, hhmm, money, quoteAt, readingAt, phaseAt };
+  // A listing's price at minute `m` of the day: its last print by then,
+  // or the previous close before its first.
+  function priceAt(prints, prev, m) {
+    let v = prev;
+    for (const p of prints) if (p.m <= m) v = p.v;
+    return v;
+  }
+
+  return { PRE, OPEN, CLOSE, POST_END, BELLS, SYMBOLS, rng, round2, hhmm, money, quoteAt, readingAt, priceAt, phaseAt };
 })();
