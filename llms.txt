@@ -1,0 +1,18 @@
+# Stonks
+
+> Stonks is a free stock watchlist plugin for the Omarchy 4 shell. It shows today's move for your stocks in the bar, and a day chart you can scrub a click away.
+
+- Install: `omarchy plugin add https://github.com/gmchande/omarchy-stonks.git --enable`. It needs Omarchy 4, which asks you to confirm and then which section of the bar gets the pill.
+- Cost: free and open source, under the MIT licence.
+- Account: none, and no API key.
+- Markets: stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. Stonks never converts currencies.
+- Sessions: a smaller line under the price shows the pre-market, after-hours, or overnight price. Overnight prices are for the US stocks and ETFs Robinhood trades overnight.
+- Prices: quotes, charts, and search come from Yahoo's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays some exchanges' quotes, London's and Tokyo's among them, by up to 30 minutes, and Stonks marks an old price with "As of" and its time.
+- Looks: smooth or retro (block digits and pixel columns), in the Omarchy theme's colours, light themes too.
+- It doesn't track holdings, send price alerts, or convert currencies, and it isn't investment advice.
+
+## Links
+
+- [Website](https://gmchande.github.io/stonks-site/)
+- [Source and README](https://github.com/gmchande/omarchy-stonks): every feature, key, and limit
+- [Report a bug](https://github.com/gmchande/omarchy-stonks/issues/new?template=bug.yml)

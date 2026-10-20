@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stonks share image</title>
+<!-- The source of ../share.png. Render it with tools/render-share.sh. -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { position: relative; background: var(--bg); }
+  .scatter { position: absolute; inset: 0; width: 1200px; height: 630px; }
+  .card { position: relative; display: grid; grid-template-columns: 600px 470px; gap: 50px; padding: 56px 40px 0 60px; }
+  .words { padding-top: 24px; }
+  .eyebrow { margin: 0 0 26px; font-size: 18px; }
+  .wordmark { margin: 0 0 36px; }
+  .say { font: 700 40px/1.25 var(--mono); color: var(--fg); margin: 0 0 26px; letter-spacing: -0.01em; }
+  .facts { font-size: 22px; color: var(--text); margin: 0; letter-spacing: 0.02em; }
+  .popup { padding: 18px 22px 18px; box-shadow: none; }
+  .chart { height: 260px; }
+  .demo-tag { font-size: 13px; }
+</style>
+</head>
+<body>
+<canvas class="scatter"></canvas>
+<div class="card">
+  <div class="words">
+    <p class="eyebrow">For the Omarchy 4 shell</p>
+    <div class="wordmark"><span class="blocks" id="mark"></span></div>
+    <p class="say">Your stocks in the bar.<br>A chart a click away.</p>
+    <p class="facts">Free · No account · No API key</p>
+  </div>
+  <div style="position: relative">
+    <div class="demo-tag">MADE-UP PRICES</div>
+    <div class="popup">
+      <div class="pop-head"><span class="animal" id="animal"></span><span class="status">Market closes in 1h 15m</span></div>
+      <div class="listing"><b>ARCADE</b>ARCADE CABINETS INC · DEMO · USD</div>
+      <div class="hero-row"><div class="price" id="price"></div><span class="change" id="change"></span></div>
+      <div class="strip"></div>
+      <canvas class="chart" id="chart"></canvas>
+    </div>
+  </div>
+</div>
+<script src="../cells.js"></script>
+<script src="../market.js"></script>
+<script>
+  const { COL } = Cells;
+  const s = Market.SYMBOLS[0];
+  const q = Market.quoteAt(s, 14 * 60 + 45);
+  document.getElementById("mark").innerHTML = Cells.blocksSVG("STONKS", 15, COL.fg, 5, 0.06);
+  document.getElementById("animal").innerHTML = Cells.spriteSVG(Cells.BULL, 2, COL.up);
+  document.getElementById("price").innerHTML = Cells.blocksSVG(Market.money(q.price), 12, COL.fg, 6);
+  const change = document.getElementById("change");
+  change.textContent = "▲" + Market.money(q.pct) + "%";
+  change.className = "change up";
+  const { ctx, w, h } = Cells.fit(document.getElementById("chart"));
+  Cells.drawRetro(ctx, w, h, q.prints, s.prev, { pixel: 7, gap: 1, ghost: 0.035, ticks: Market.BELLS, lastCap: q.lastRegular, scrub: -1 });
+  const sc = Cells.fit(document.querySelector(".scatter"));
+  const r = Market.rng(5);
+  for (let y = 0; y < 630; y += 22) for (let x = 0; x < 1200; x += 22) {
+    const edge = Math.abs(x / 1200 - 0.5) * 2;
+    if (r() < Math.pow(edge, 6) * 0.6) { sc.ctx.fillStyle = Cells.rgba(COL.accent, 0.06 + r() * 0.12); sc.ctx.fillRect(x, y, 12, 12); }
+  }
+</script>
+</body>
+</html>
