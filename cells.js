@@ -1,5 +1,5 @@
-// Drawing: Stonks' block digits and sprites (from its Cells.js), the retro
-// and smooth charts, the drawn bull and bear. Knows no prices.
+// Drawing: Stonks' block digits and pixel sprites (from its Cells.js), and
+// the retro and smooth charts. Knows no prices.
 window.Cells = (() => {
   "use strict";
 
@@ -299,68 +299,6 @@ window.Cells = (() => {
     }
   }
 
-  // The smooth bull and bear, from Stonks' DrawnAnimal: one round line and
-  // a wash, drawn on a 40 by 28 grid; `lids` 0 open, 1 shut.
-  function drawAnimal(ctx, bull, color, lids) {
-    ctx.save();
-    ctx.lineJoin = "round"; ctx.lineCap = "round";
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = rgba(color, 0.16);
-    const dot = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); };
-    const eye = (x, y, r) => {
-      const slit = ctx.lineWidth / 2 / r;
-      ctx.save();
-      ctx.translate(x, y + r * 0.4 * lids);
-      ctx.scale(1 + 0.6 * lids, 1 - (1 - slit) * lids);
-      dot(0, 0, r);
-      ctx.restore();
-    };
-    if (bull) {
-      ctx.beginPath();
-      ctx.moveTo(13.5, 8.5);
-      ctx.quadraticCurveTo(20, 6.2, 26.5, 8.5);
-      ctx.quadraticCurveTo(27.6, 13, 25.2, 17.2);
-      ctx.quadraticCurveTo(27.2, 19.4, 26.2, 23);
-      ctx.quadraticCurveTo(20, 27.4, 13.8, 23);
-      ctx.quadraticCurveTo(12.8, 19.4, 14.8, 17.2);
-      ctx.quadraticCurveTo(12.4, 13, 13.5, 8.5);
-      ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(13.8, 10); ctx.quadraticCurveTo(5, 11.5, 3.5, 3);
-      ctx.moveTo(26.2, 10); ctx.quadraticCurveTo(35, 11.5, 36.5, 3);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(13.6, 12.4); ctx.quadraticCurveTo(9.4, 13.8, 8.6, 12.6);
-      ctx.moveTo(26.4, 12.4); ctx.quadraticCurveTo(30.6, 13.8, 31.4, 12.6);
-      ctx.stroke();
-      ctx.fillStyle = color;
-      eye(17, 13.2, 1.15); eye(23, 13.2, 1.15); dot(17.6, 21.6, 0.95); dot(22.4, 21.6, 0.95);
-    } else {
-      const rad = (d) => (Math.PI * d) / 180;
-      ctx.beginPath();
-      ctx.arc(11.49, 7.71, 3.58, rad(145), rad(335), false);
-      ctx.quadraticCurveTo(20, 5.47, 25.26, 6.2);
-      ctx.arc(28.51, 7.71, 3.58, rad(205), rad(35), false);
-      ctx.quadraticCurveTo(32.54, 12.86, 32.77, 17.34);
-      ctx.quadraticCurveTo(31.87, 22.27, 26.27, 24.74);
-      ctx.quadraticCurveTo(20, 27.65, 13.73, 24.74);
-      ctx.quadraticCurveTo(8.13, 22.27, 7.23, 17.34);
-      ctx.quadraticCurveTo(7.46, 12.86, 8.55, 9.77);
-      ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(20, 19.81); ctx.lineTo(20, 21.82); ctx.stroke();
-      ctx.fillStyle = color;
-      eye(15.52, 13.76, 1.29); eye(24.48, 13.76, 1.29);
-      ctx.beginPath();
-      ctx.moveTo(17.98, 17.57);
-      ctx.quadraticCurveTo(20, 17.01, 22.02, 17.57);
-      ctx.quadraticCurveTo(22.24, 20.26, 20, 19.81);
-      ctx.quadraticCurveTo(17.76, 20.26, 17.98, 17.57);
-      ctx.closePath(); ctx.fill();
-    }
-    ctx.restore();
-  }
-
   // A thin rule: dotted cells in retro, a line in smooth.
   function drawRule(canvas, retro, segments, tickAt) {
     const { ctx, w, h } = fit(canvas);
@@ -383,6 +321,6 @@ window.Cells = (() => {
 
   return {
     COL, rgba, blockCells, blocksSVG, spriteSVG, sprite, SLEEP_Z, BULL, BEAR, markSVG,
-    fit, drawRetro, drawSmooth, drawAnimal, drawRule,
+    fit, drawRetro, drawSmooth, drawRule,
   };
 })();

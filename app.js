@@ -241,23 +241,17 @@
 
       // The animal is the direction of the moment shown against the
       // baseline; it sleeps while its market rests, and wakes for a scrub.
+      // It is the pixel bull or bear in both looks, as Stonks draws it.
       const dir = tone(((shown - base) / base) * 100);
       const asleep = !scrubbed && day && q.asleep;
       el.animal.innerHTML = "";
       el.animal.disabled = !dir || !pts.length;
       el.animal.hidden = !dir;
       if (dir) {
-        const color = dir === "up" ? COL.up : COL.down;
-        if (retro) el.animal.innerHTML = Cells.spriteSVG(Cells.sprite(dir === "up", asleep), 2, color);
-        else {
-          const c = document.createElement("canvas");
-          c.style.width = "40px"; c.style.height = "28px";
-          el.animal.appendChild(c);
-          Cells.drawAnimal(Cells.fit(c).ctx, dir === "up", color, asleep ? 1 : 0);
-        }
+        el.animal.innerHTML = Cells.spriteSVG(Cells.sprite(dir === "up", asleep), 2, dir === "up" ? COL.up : COL.down);
         el.animal.setAttribute("aria-label", `Replay the chart (the ${dir === "up" ? "bull" : "bear"}${asleep ? ", asleep" : ""})`);
       }
-      el.zz.innerHTML = asleep && dir ? (retro ? Cells.spriteSVG(Cells.SLEEP_Z, 2, rgba(COL.fg, 0.5)) : "z") : "";
+      el.zz.innerHTML = asleep && dir ? Cells.spriteSVG(Cells.SLEEP_Z, 2, rgba(COL.fg, 0.5)) : "";
       el.status.textContent = status;
 
       el.look.innerHTML = retro ? LOOK_ICONS.toSmooth : LOOK_ICONS.toRetro();

@@ -11,10 +11,10 @@
   body { position: relative; background: var(--bg); }
   .scatter { position: absolute; inset: 0; width: 1200px; height: 630px; }
   .card { position: relative; display: grid; grid-template-columns: 600px 470px; gap: 50px; padding: 56px 40px 0 60px; }
-  .words { padding-top: 24px; }
-  .eyebrow { margin: 0 0 26px; font-size: 18px; }
-  .wordmark { margin: 0 0 36px; }
-  .say { font: 700 40px/1.25 var(--mono); color: var(--fg); margin: 0 0 26px; letter-spacing: -0.01em; }
+  .words { padding-top: 14px; }
+  .logo { display: block; margin: 0 0 26px; }
+  .wordmark { margin: 0 0 32px; }
+  .say { font: 700 40px/1.25 var(--mono); color: var(--fg); margin: 0 0 22px; letter-spacing: -0.01em; }
   .facts { font-size: 22px; color: var(--text); margin: 0; letter-spacing: 0.02em; }
   .popup { padding: 18px 22px 18px; box-shadow: none; }
   .chart { height: 260px; }
@@ -25,10 +25,10 @@
 <canvas class="scatter"></canvas>
 <div class="card">
   <div class="words">
-    <p class="eyebrow">For the Omarchy 4 shell</p>
+    <img class="logo" src="../img/bull.svg" width="120" height="78" alt="">
     <div class="wordmark"><span class="blocks" id="mark"></span></div>
     <p class="say">Your stocks in the bar.<br>A chart a click away.</p>
-    <p class="facts">Free · No account · No API key</p>
+    <p class="facts">For Omarchy 4 · Free · No API key</p>
   </div>
   <div style="position: relative">
     <div class="demo-tag">MADE-UP PRICES</div>
