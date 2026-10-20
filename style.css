@@ -385,8 +385,8 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .pill { top: 26px; font-size: 16px; height: 38px; padding: 0 10px; left: auto; right: 0; transform: translateY(-50%); }
   .pill .arrow { font-size: 16px; }
   .moves, .faq { grid-template-columns: 1fr; }
-  .day-sticky { padding: 12px 12px 16px; gap: 14px; justify-content: flex-start; }
-  .popup.compact .chart { height: 140px; }
+  .day-sticky { padding: 12px 12px 16px; gap: 14px; }
+  .popup.compact .chart { height: 170px; }
   .theme-ground { padding: 10px; }
   .moves div { grid-template-columns: 80px 1fr; }
   .rules div { grid-template-columns: 1fr; gap: 4px; }
