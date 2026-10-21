@@ -165,7 +165,7 @@
             <dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd>
             <dt><kbd>1</kbd>–<kbd>4</kbd></dt><dd>Show that row's chart</dd>
             <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Percent, amount, or since the open</dd>
+            <dt><kbd>c</kbd></dt><dd>Show the day's change as a percent, an amount, or since the open</dd>
             <dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd>
             <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
           </dl>
@@ -543,9 +543,10 @@
     } else if (form === "text") {
       pill.innerHTML = `${sym}<span>${money(q.price)}</span>${change}`;
     } else {
-      pill.innerHTML = Cells.markSVG(small ? 3 : 4, 6, color, q.pct < 0);
+      // The day's animal: the bull up, the bear down, nothing on a flat day.
+      pill.innerHTML = t ? Cells.spriteSVG(Cells.sprite(t === "up", false), 2, color) : "";
     }
-    pill.setAttribute("aria-label", `Stonks' pill as ${form === "icon" ? "the mark" : `a ${form}`}, made-up prices: ${s.sym} ${signed(q.pct, false, "%")}. Click to change its form.`);
+    pill.setAttribute("aria-label", `Stonks' pill as ${form === "icon" ? `the ${t === "up" ? "bull" : t === "down" ? "bear" : "day's animal"}` : `a ${form}`}, made-up prices: ${s.sym} ${signed(q.pct, false, "%")}. Click to change its form.`);
     formButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.form === form)));
   }
   const setForm = (f) => { form = f; renderPill(); };
