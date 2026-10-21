@@ -1,0 +1,48 @@
+# Keeps the Stonks README's marketplace badges current: reads Stonks' listing
+# on the Omarchy plugin marketplace every hour and commits the two badge
+# files to the marketplace-status branch when they change. The badges read
+# them from there through shields.io, so nothing lands on main, which
+# GitHub Pages serves as getstonks.app.
+name: Marketplace status
+
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: marketplace-status
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read the marketplace
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/marketplace-status.mjs "$RUNNER_TEMP/status"
+
+      - name: Commit the badges when they change
+        run: |
+          git config --global user.name "Gaurav Chande"
+          git config --global user.email code@gauravchande.com
+          if git fetch --depth=1 origin marketplace-status; then
+            git worktree add -B marketplace-status "$RUNNER_TEMP/branch" FETCH_HEAD
+          else
+            git worktree add --orphan -b marketplace-status "$RUNNER_TEMP/branch"
+          fi
+          cd "$RUNNER_TEMP/branch"
+          cp "$RUNNER_TEMP"/status/*.json .
+          git add marketplace.json verified.json
+          if git diff --cached --quiet; then
+            echo "No change: $(cat marketplace.json)"
+            exit 0
+          fi
+          git commit -m "Marketplace: $(jq -r .message marketplace.json), last verified $(jq -r .message verified.json)"
+          git push origin marketplace-status
