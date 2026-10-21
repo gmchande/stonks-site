@@ -32,4 +32,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://gmchande.github.io/stonks-site/sitemap.xml
+Sitemap: https://getstonks.app/sitemap.xml

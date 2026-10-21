@@ -2,7 +2,9 @@
 // page against what a person reads on it: node tools/check.js
 // - the FAQPage JSON-LD says exactly what the FAQ on the page says;
 // - the app's JSON-LD description is the page's "What is Stonks?" answer;
-// - the site's address is the same in every file that names it;
+// - the site's address is the same in every file that names it, and a
+//   custom domain's CNAME names its host;
+// - nothing loads over plain HTTP, which a .app domain refuses;
 // - one h1, and alt text on every picture.
 "use strict";
 const fs = require("fs");
@@ -42,6 +44,18 @@ for (const [file, body] of Object.entries(addressed)) {
   for (const url of body.match(/https:\/\/[a-z0-9.-]+\.github\.io\/[^\s"<)]*/g) || []) {
     if (!url.startsWith(canonical)) fail(`${file} names ${url}, outside ${canonical}`);
   }
+}
+const host = canonical ? new URL(canonical).host : "";
+const cname = fs.existsSync(path.join(root, "CNAME")) ? read("CNAME").trim() : null;
+if (host.endsWith(".github.io")) {
+  if (cname !== null) fail(`CNAME names ${cname}, but the address is ${canonical}`);
+} else if (cname !== host) fail(`CNAME names ${cname}, not ${host}`);
+
+// An XML namespace is a name, never fetched.
+const names = /http:\/\/www\.(w3\.org\/2000\/svg|sitemaps\.org\/schemas\/sitemap\/0\.9)/g;
+for (const file of ["index.html", "style.css", "cells.js", "market.js", "app.js", "sitemap.xml", "robots.txt", "llms.txt"]) {
+  const plain = read(file).replace(names, "").match(/http:\/\/[^\s"'<)]+/g);
+  if (plain) fail(`${file} names ${plain.join(", ")} over plain HTTP`);
 }
 
 const h1s = html.match(/<h1[\s>]/g) || [];
