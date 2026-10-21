@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Renders tools/share-card.html to share.png (1200 x 630), the image a
-# shared link shows. Needs Chromium and ImageMagick. The icons (icon.svg,
-# img/bull.svg, favicon-*.png, apple-touch-icon.png) come from the logo set
+# shared link shows. Needs Chromium and ImageMagick. The icons (img/bull.svg,
+# favicon-*.png, icon-192.png, apple-touch-icon.png) come from the logo set
 # in Stonks' out/design/logo, drawn there in whole cells at each size.
 set -euo pipefail
 cd "$(dirname "$0")/.."

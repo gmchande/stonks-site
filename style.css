@@ -405,6 +405,9 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 /* The narrowest phones: the bull alone names the brand, so the links fit. */
 @media (max-width: 359px) {
   .brand span { display: none; }
+  /* The text form's longest, HISCORE 1,284.54 ▼0.15%, clears the workspace numbers. */
+  .pill { font-size: 13px; gap: 6px; padding: 0 6px; }
+  .pill .arrow { font-size: 13px; }
 }
 
 /* A short landscape screen: the clock beside the popup, the chart lower,
