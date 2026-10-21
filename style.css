@@ -69,7 +69,7 @@ button { font: inherit; color: inherit; }
 .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between;
-  height: 44px; padding: 0 20px;
+  height: 44px; padding: 0 20px; gap: 16px;
   background: rgba(19, 20, 28, 0.94);
   border-bottom: 1px solid var(--line);
   font-size: 13px; letter-spacing: 0.12em;
@@ -166,7 +166,8 @@ button { font: inherit; color: inherit; }
 .price .smooth-price { font: 700 52px/1 var(--mono); letter-spacing: -0.02em; display: block; }
 .change { border: 0; background: none; padding: 0; font: 400 28px/1 var(--mono); cursor: pointer; white-space: nowrap; }
 .change:disabled { cursor: default; }
-.strip { display: flex; justify-content: space-between; gap: 12px; min-height: 18px; margin: 6px 0 14px; font-size: 11px; letter-spacing: 0.14em; color: var(--muted); white-space: nowrap; }
+.strip { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; min-height: 18px; margin: 6px 0 14px; font-size: 11px; letter-spacing: 0.14em; color: var(--muted); white-space: nowrap; }
+.change-cap { margin-left: auto; }
 .strip b { color: var(--fg); font-weight: 400; }
 .up { color: var(--up); }
 .down { color: var(--down); }
@@ -361,7 +362,8 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 
 @media (max-width: 640px) {
   body { font-size: 15px; }
-  .topbar { padding: 0 14px; }
+  .topbar { padding: 0 14px; letter-spacing: 0.06em; }
+  .topbar nav { gap: 14px; }
   .hero { padding: 36px 16px 0; }
   .eyebrow { margin-bottom: 20px; font-size: 12px; }
   .lead { font-size: 21px; }
@@ -376,8 +378,9 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .rows { margin: 0 -8px; }
   .row { padding: 7px 8px; grid-template-columns: minmax(0, 1fr) 56px 84px; gap: 8px; }
   .row canvas { width: 56px; }
-  .price .smooth-price { font-size: 40px; }
-  .change { font-size: 22px; }
+  /* The longest demo figures, 1,284.54 and +427.32%, fit a 320 px screen. */
+  .price .smooth-price { font-size: min(40px, 10vw); }
+  .change { font-size: min(22px, 5.5vw); }
   .chart { height: 170px; }
   .ranges button { padding: 3px 3px; font-size: 11px; }
   .fake-bar { height: 52px; padding: 0 12px; }
@@ -397,6 +400,11 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .sprite { display: none; }
   .finale { padding-top: 88px; }
   .skyline { height: 80px; margin-top: 48px; }
+}
+
+/* The narrowest phones: the bull alone names the brand, so the links fit. */
+@media (max-width: 359px) {
+  .brand span { display: none; }
 }
 
 /* A short landscape screen: the clock beside the popup, the chart lower,
