@@ -616,19 +616,24 @@
   Look.on(showTheme);
 
   // ---- Keys: a pressed key lights its move; s switches the look anywhere.
+  // A key held with Ctrl is named "Ctrl+" and its letter, as Ctrl+Z's row
+  // is, and an arrow or Tab held with Shift "Shift+" and its name (a
+  // shifted letter is its capital already). Lighting never stops a key's
+  // own work: a field still takes its typing and the browser its undo.
 
   const moves = [...document.querySelectorAll(".moves [data-keys]")];
   let unlight = 0;
   document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.metaKey || e.altKey) return;
     if (e.target.closest("input, textarea, select, [contenteditable]")) return;
-    const row = moves.find((r) => r.dataset.keys.split(" ").includes(e.key));
+    const key = e.ctrlKey ? "Ctrl+" + e.key.toLowerCase() : (e.shiftKey && e.key.length > 1 ? "Shift+" : "") + e.key;
+    const row = moves.find((r) => r.dataset.keys.split(" ").includes(key));
     if (row) {
       moves.forEach((r) => r.classList.toggle("lit", r === row));
       clearTimeout(unlight);
       unlight = setTimeout(() => row.classList.remove("lit"), 1600);
     }
-    if (e.key === "s") Look.toggle();
+    if (key === "s") Look.toggle();
   });
 
   // ---- Page cells: headings, sprites, the hero's ground
