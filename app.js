@@ -181,7 +181,6 @@
       this.scrub = -1;
       this.reveal = 1;
       this.stopSweep = null;
-      this.restingAt = null; // where the pointer rested as its replay began
       this.chart = null; // what the chart drew, which its chimes play
       this.chimed = -1;
       this.scrubMinute = null;
@@ -249,12 +248,12 @@
       el.animal.addEventListener("click", () => this.replay());
       el.look.addEventListener("click", () => Look.toggle());
       el.change.addEventListener("click", () => { if (this.range === "1D") this.cycleChange(); });
-      el.chart.addEventListener("pointermove", (e) => { if (!this.resting(e)) this.scrubAt(e.clientX); });
-      el.chart.addEventListener("pointerdown", (e) => this.scrubAt(e.clientX));
-      el.chart.addEventListener("pointerleave", () => {
-        this.restingAt = null;
-        if (this.scrub >= 0 && !this.stopSweep) this.endScrub();
-      });
+      // While a replay draws, the pointer leaves it be: the opening replay
+      // plays out under a reader's passing cursor. Once it's drawn, the
+      // pointer scrubs.
+      el.chart.addEventListener("pointermove", (e) => { if (!this.stopSweep) this.scrubAt(e.clientX); });
+      el.chart.addEventListener("pointerdown", (e) => { if (!this.stopSweep) this.scrubAt(e.clientX); });
+      el.chart.addEventListener("pointerleave", () => { if (this.scrub >= 0 && !this.stopSweep) this.endScrub(); });
       r.addEventListener("keydown", (e) => this.key(e));
       if (this.full) {
         el.help.addEventListener("click", () => this.toggleSheet());
@@ -626,17 +625,13 @@
       this.scrubTo(nearest(pts, Math.max(0, Math.min(1, (clientX - r.left) / r.width))), false);
     }
 
-    // The chart draws in behind the replay's scrub. A replay started with
-    // the pointer resting on the chart, as "Hear the replay" leaves it
-    // there, plays out while the pointer only drifts (`restingAt`, where it
-    // rests); moving along the chart, leaving it, or a press scrubs.
-    replay(restingAt = null) {
+    // The chart draws in behind the replay's scrub.
+    replay() {
       this.stopReplay();
       const { pts } = this.series();
       if (!pts.length || reducedMotion.matches) { this.scrub = -1; this.render(); return; }
-      this.restingAt = restingAt;
       this.stopSweep = sweep(pts, this.chart, (i, reveal) => {
-        if (i < 0) { this.stopSweep = null; this.restingAt = null; }
+        if (i < 0) this.stopSweep = null;
         this.scrub = i;
         this.reveal = reveal;
         this.render();
@@ -645,16 +640,7 @@
     stopReplay() {
       if (this.stopSweep) this.stopSweep();
       this.stopSweep = null;
-      this.restingAt = null;
       this.reveal = 1;
-    }
-    // Whether a pointer move is only the resting pointer's drift, within
-    // 16 px of where the replay began; past that, the move scrubs.
-    resting(e) {
-      if (!this.stopSweep || !this.restingAt) return false;
-      if (Math.hypot(e.clientX - this.restingAt.x, e.clientY - this.restingAt.y) < 16) return true;
-      this.restingAt = null;
-      return false;
     }
 
     // The newest print drawn strikes its bar when the bar changes, as a
@@ -962,9 +948,7 @@
   let held = false, release = 0;
   const letGo = () => { clearTimeout(release); held = false; paintHear(); };
   for (const type of ["pointerdown", "keydown"]) hear.addEventListener(type, () => { clearTimeout(release); held = true; });
-  // A click by the pointer leaves it resting on the chart, under where the
-  // button was; one by a key leaves no pointer there.
-  hear.addEventListener("click", (e) => { hero.replay(e.detail ? { x: e.clientX, y: e.clientY } : null); letGo(); });
+  hear.addEventListener("click", () => { hero.replay(); letGo(); });
   for (const type of ["pointerup", "pointercancel", "keyup"]) {
     addEventListener(type, () => { if (held) { clearTimeout(release); release = setTimeout(letGo, 300); } });
   }
@@ -1021,8 +1005,8 @@
     const r = strip.getBoundingClientRect();
     stripTo(nearest(stripPts, Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))), false);
   };
-  strip.addEventListener("pointermove", stripAt);
-  strip.addEventListener("pointerdown", stripAt);
+  strip.addEventListener("pointermove", (e) => { if (!stopStrip) stripAt(e); });
+  strip.addEventListener("pointerdown", (e) => { if (!stopStrip) stripAt(e); });
   strip.addEventListener("pointerleave", () => { if (!stopStrip) stripTo(-1); });
   strip.addEventListener("keydown", (e) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
