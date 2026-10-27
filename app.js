@@ -49,32 +49,59 @@
   // (`Sound.whenHeard`), and the picture keeps to what the speakers have
   // played (the replay's clock), never more than 1 s behind the page's own.
   // Returns the replay's stop, which stops its sound too, or drops its wait.
+  //
+  // Sound joins a replay as a song unmuted plays on: one drawing in
+  // silence, before the reader's first press or with sound off, is joined
+  // by its sound as sound starts, from where the picture has reached; one
+  // muted draws on by the page's clock (`replays`, those drawing).
+  const replays = new Set();
+  Sound.onChange(() => replays.forEach((r) => (Sound.heard ? r.join() : !Sound.on && r.hush())));
+
   function sweep(pts, chart, step) {
     const from = pts[0].x, to = pts[pts.length - 1].x;
-    let frame = 0;
+    let frame = 0, heard = null, t0 = 0, f = 0, dropJoin = () => {};
+    const r = {
+      join() {
+        if (heard) return;
+        dropJoin();
+        dropJoin = Sound.whenHeard(() => {
+          if (frame && !heard) heard = Sound.replay(chart, from, to, REPLAY_MS / 1000, f * REPLAY_MS / 1000);
+        });
+      },
+      hush() {
+        heard = null;
+        t0 = performance.now() - f * REPLAY_MS;
+      },
+    };
+    const tick = (t) => {
+      const ms = heard ? Math.max(heard() * 1000, t - t0 - 1000) : t - t0;
+      f = Math.max(f, Math.min(1, ms / REPLAY_MS));
+      const x = from + inOutSine(f) * (to - from);
+      let i = 0;
+      while (i + 1 < pts.length && pts[i + 1].x <= x) i++;
+      frame = f < 1 ? requestAnimationFrame(tick) : 0;
+      if (!frame) replays.delete(r);
+      step(f < 1 ? i : -1, f < 1 ? x + 0.0001 : 1);
+    };
     const drop = Sound.whenHeard(() => {
-      const heard = Sound.replay(chart, from, to, REPLAY_MS / 1000);
-      const t0 = performance.now();
-      let f = 0;
-      const tick = (t) => {
-        const ms = heard ? Math.max(heard() * 1000, t - t0 - 1000) : t - t0;
-        f = Math.max(f, Math.min(1, ms / REPLAY_MS));
-        const x = from + inOutSine(f) * (to - from);
-        let i = 0;
-        while (i + 1 < pts.length && pts[i + 1].x <= x) i++;
-        frame = f < 1 ? requestAnimationFrame(tick) : 0;
-        step(f < 1 ? i : -1, f < 1 ? x + 0.0001 : 1);
-      };
+      heard = Sound.replay(chart, from, to, REPLAY_MS / 1000);
+      t0 = performance.now();
+      replays.add(r);
       frame = requestAnimationFrame(tick);
     });
     return () => {
       drop();
+      dropJoin();
+      replays.delete(r);
       if (!frame) return;
       cancelAnimationFrame(frame);
       frame = 0;
       Sound.stopReplay();
     };
   }
+  // Whether a replay is drawing: sound turned on now joins it, and plays no
+  // add sound, which would cut it off.
+  const joining = () => replays.size > 0;
 
   // ---- History for the ranges: every range is a slice of one made-up
   // history, so a range's high is never above the 52 weeks' it sits in.
@@ -904,7 +931,7 @@
       unlight = setTimeout(() => row.classList.remove("lit"), 1600);
     }
     if (key === "s") Look.toggle();
-    if (key === "m") Sound.toggle(Look.retro);
+    if (key === "m") Sound.toggle(Look.retro, joining());
   });
 
   // ---- The speakers: the bar's and each popup's say whether sound is on,
@@ -928,7 +955,7 @@
       b.dataset.tip = label;
     });
   }
-  document.addEventListener("click", (e) => { if (e.target.closest("[data-sound-toggle]")) Sound.press(Look.retro); });
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-sound-toggle]")) Sound.press(Look.retro, joining()); });
   Sound.onChange(paintSpeakers);
 
   // The hero's invitation: while sound waits for the reader's first click
@@ -948,7 +975,9 @@
   let held = false, release = 0;
   const letGo = () => { clearTimeout(release); held = false; paintHear(); };
   for (const type of ["pointerdown", "keydown"]) hear.addEventListener(type, () => { clearTimeout(release); held = true; });
-  hear.addEventListener("click", () => { hero.replay(); letGo(); });
+  // It joins a replay already drawing, as its press starts the sound;
+  // with none drawing, it starts one.
+  hear.addEventListener("click", () => { if (!hero.stopSweep) hero.replay(); letGo(); });
   for (const type of ["pointerup", "pointercancel", "keyup"]) {
     addEventListener(type, () => { if (held) { clearTimeout(release); release = setTimeout(letGo, 300); } });
   }

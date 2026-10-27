@@ -289,7 +289,7 @@ window.Sound = (() => {
     try { src.stop(); } catch { /* ended */ }
   }
 
-  function start(buffer, alone) {
+  function start(buffer, alone, offset = 0) {
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(ctx.destination);
@@ -298,7 +298,7 @@ window.Sound = (() => {
       solo = src;
       src.onended = () => { if (solo === src) solo = null; };
     }
-    src.start();
+    src.start(0, offset);
     return src;
   }
 
@@ -407,13 +407,19 @@ window.Sound = (() => {
   // seconds of it the speakers have played, or null while nothing sounds:
   // a browser plays what it makes a little later, 0.3 s in Chrome over
   // PipeWire, so a picture kept to the clock keeps to what's heard.
-  function replay(chart, from, to, seconds) {
+  //
+  // `offset`, in seconds, joins a replay already drawing in silence, as a
+  // song unmuted plays on: its sound starts that far in, and further by the
+  // output's delay, so what the speakers first play is where the picture
+  // has reached by then.
+  function replay(chart, from, to, seconds, offset = 0) {
     stopReplay();
     if (!ready() || !chart) return null;
     const sound = chart.retro ? retroReplay(chart.grid, from, to, seconds) : smoothReplay(chart.geometry, from, to, seconds);
+    const skip = offset ? Math.min(seconds, offset + (ctx.baseLatency || 0) + (ctx.outputLatency || 0)) : 0;
     const at = ctx.currentTime;
-    replaySource = start(bufferOf(sound), true);
-    return () => playing() - at;
+    replaySource = start(bufferOf(sound), true, skip);
+    return () => skip + playing() - at;
   }
 
   // The context's time the speakers are playing now, by the output's own
@@ -431,7 +437,9 @@ window.Sound = (() => {
 
   // On or off; turned on, the add sound plays once, so you hear how loud
   // they are.
-  function set(value, retro) {
+  // `quiet` turns sound on without the add sound, while a replay draws:
+  // its own sound joins it, and the add sound would cut it off.
+  function set(value, retro, quiet = false) {
     on = value;
     try { localStorage.setItem("stonks-sound", on ? "on" : "off"); } catch { /* not remembered */ }
     if (!on) {
@@ -444,21 +452,21 @@ window.Sound = (() => {
       ringing.clear();
     }
     listeners.forEach((fn) => fn());
-    if (on) { unlock(); play(retro, "add"); }
+    if (on) { unlock(); if (!quiet) play(retro, "add"); }
   }
 
   // The speaker pressed: while sound waits for the reader's first press,
   // it starts sound, as its label says; otherwise it turns sound on or off.
-  function press(retro) {
+  function press(retro, quiet = false) {
     const waited = pressWaited || (on && !ctx);
     pressWaited = false;
-    set(waited || !on, retro);
+    set(waited || !on, retro, quiet);
   }
 
   return {
     get on() { return on; },
     get heard() { return ready(); },
-    set, toggle: (retro) => set(!on, retro), press, onChange: (fn) => listeners.push(fn),
+    set, toggle: (retro, quiet = false) => set(!on, retro, quiet), press, onChange: (fn) => listeners.push(fn),
     play, chime, barAt, whenHeard, replay, stopReplay,
   };
 })();
