@@ -746,20 +746,31 @@
     const heard = Math.abs(now - before) < 180 && performance.now() > linkScroll;
     dayPop.chimeDrawn(!heard);
     const passed = [Market.OPEN, Market.CLOSE].find((bell) => before < bell && now >= bell);
-    if (passed && heard) Sound.play(Look.retro, "bell").then((rang) => { if (rang) nameBell(passed === Market.OPEN ? 1 : 2); });
+    if (passed && heard) ringBell(passed === Market.OPEN ? 1 : 2);
   }
 
-  // The line under the clock names the bell as it's heard, for 2 s, about
-  // the smooth bell's ring, then goes back to the day's place. Every
-  // wording sits in one cell, so the line keeps its longest one's width and
-  // nothing moves.
+  // The line under the clock names the bell that's heard: as each reaches
+  // the speakers, its name replaces the last one's, for 2 s, about the
+  // smooth bell's ring, then the day's place comes back. While a bell is
+  // on its way, the one it cut short keeps its name until it lands, so the
+  // place never shows between them. Every wording sits in one cell, so the
+  // line keeps its longest one's width and nothing moves.
   const place = daySection.querySelector(".clock-place");
   place.innerHTML = [place.textContent, "OPENING BELL", "CLOSING BELL"].map((t, i) => `<span${i ? "" : ' class="shown"'}>${t}</span>`).join("");
-  let bellNamed = 0;
+  let bellNamed = 0, bellsComing = 0, nameDone = false;
+  function ringBell(i) {
+    bellsComing++;
+    Sound.play(Look.retro, "bell").then((rang) => {
+      bellsComing--;
+      if (rang) nameBell(i);
+      else if (nameDone && !bellsComing) nameBell(0);
+    });
+  }
   function nameBell(i) {
     [...place.children].forEach((s, k) => s.classList.toggle("shown", k === i));
     clearTimeout(bellNamed);
-    if (i) bellNamed = setTimeout(() => nameBell(0), 2000);
+    nameDone = false;
+    if (i) bellNamed = setTimeout(() => { nameDone = true; if (!bellsComing) nameBell(0); }, 2000);
   }
   let linkScroll = 0;
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#"]')) linkScroll = performance.now() + 1500; });
