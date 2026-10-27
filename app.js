@@ -338,7 +338,9 @@
       }
       el.zz.innerHTML = asleep && dir ? Cells.spriteSVG(Cells.SLEEP_Z, 2, rgba(COL.fg, 0.5)) : "";
       el.title.textContent = s.name;
-      el.status.textContent = status;
+      // With less room, as Stonks does, the status says less and keeps the time.
+      const short = scrubbed ? status.replace(/ · .*$/, "") : status.replace(/^(Market|[^·]+ ·) /, "");
+      el.status.textContent = innerWidth <= 640 ? short : status;
 
       el.look.innerHTML = retro ? LOOK_ICONS.toSmooth : LOOK_ICONS.toRetro();
       el.look.setAttribute("aria-label", retro ? "Switch to smooth" : "Switch to retro");
@@ -373,7 +375,7 @@
 
       if (this.full) {
         for (const b of el.ranges.children) b.setAttribute("aria-pressed", String(b.dataset.range === key));
-        this.renderInfo(s, q, pts, key, shown);
+        this.renderInfo(s, q, pts, key);
         this.renderRows();
       }
 
@@ -403,7 +405,7 @@
     // The lines under the ranges: the range's low and high with the price
     // between, beside its open (on 1D) or START, and its volume; then the
     // past 52 weeks', beside the market cap and P/E.
-    renderInfo(s, q, pts, key, shown) {
+    renderInfo(s, q, pts, key) {
       const retro = Look.retro;
       const day = key === "1D";
       const week = rangeSeries(s, "1W", q), year = rangeSeries(s, "1Y", q);
@@ -413,7 +415,7 @@
         [key, day ? q.low : pts.lo, day ? q.high : pts.hi,
           day ? "Open" : "Start", day ? (q.open === null ? "" : money(q.open)) : money(pts[0].v),
           "Vol", Market.big(day ? q.volume : s.vol * Math.min(sessions, HISTORY_DAYS) * 0.94 + q.volume)],
-        ["52W", yearLo, yearHi, "Mkt cap", `USD ${Market.big(s.shares * shown)}`, "P/E", (shown / s.eps).toFixed(1)],
+        ["52W", yearLo, yearHi, "Mkt cap", `USD ${Market.big(s.shares * q.price)}`, "P/E", (q.price / s.eps).toFixed(1)],
       ];
       this.el.info.innerHTML = lines.map(([label, , , k1, v1, k2, v2]) =>
         `<span>${label}</span><b></b><canvas aria-hidden="true"></canvas><b></b><span class="fact">${k1}</span><b class="fact">${v1}</b><span class="fact">${k2}</span><b class="fact">${v2}</b>`).join("");
@@ -421,7 +423,7 @@
       lines.forEach(([, lo, hi], k) => {
         kids[k * 8 + 1].textContent = lo === null ? "" : money(lo);
         kids[k * 8 + 3].textContent = hi === null ? "" : money(hi);
-        Cells.drawRule(kids[k * 8 + 2], retro, [[1, COL.fg, 0.14]], lo === null ? null : (shown - lo) / (hi - lo || 1));
+        Cells.drawRule(kids[k * 8 + 2], retro, [[1, COL.fg, 0.14]], lo === null ? null : (q.price - lo) / (hi - lo || 1));
       });
       const pcts = this.symbols.map((x) => this.rowReading(x).pct);
       const ups = pcts.filter((p) => tone(p) === "up").length;
