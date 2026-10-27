@@ -73,13 +73,15 @@
     { "@type": "Question", "name": "Where do Stonks' prices come from?",
       "acceptedAnswer": { "@type": "Answer", "text": "Stonks gets quotes, charts, and search from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with \"As of\" and its time." } },
     { "@type": "Question", "name": "Does Stonks show pre-market, after-hours, and overnight prices?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market." } },
     { "@type": "Question", "name": "Which markets does Stonks follow?",
       "acceptedAnswer": { "@type": "Answer", "text": "Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts currencies." } },
+    { "@type": "Question", "name": "Does Stonks make sounds?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Click the speaker at the top right, or press m, to turn them off." } },
     { "@type": "Question", "name": "Does Stonks track my portfolio or send price alerts?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks doesn't track holdings, send price alerts, or convert currencies. It shows prices and charts for the stocks you follow." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks doesn't track holdings, send price alerts, or convert prices into another currency. It shows prices and charts for the stocks you follow." } },
     { "@type": "Question", "name": "What does Stonks cost?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Nothing. Stonks is free and open source, under the MIT licence." } }
+      "acceptedAnswer": { "@type": "Answer", "text": "Nothing. Stonks is free and open source, under the MIT license." } }
   ]
 }
 </script>
@@ -92,6 +94,7 @@
     <span>STONKS</span>
   </a>
   <nav>
+    <button type="button" class="speaker" data-sound-toggle aria-pressed="true"><span class="speaker-icon" aria-hidden="true"></span><span class="speaker-word">SOUND</span></button>
     <a href="#faq">FAQ</a>
     <a href="https://github.com/gmchande/omarchy-stonks">GitHub</a>
     <a class="btn btn-small" href="#install">Install</a>
@@ -107,18 +110,18 @@
       <p class="eyebrow">A stock watchlist for the Omarchy 4 bar</p>
       <h1 class="wordmark"><span class="blocks" data-text="STONKS" data-cell="16" aria-hidden="true"></span><span class="sr">Stonks, a stock ticker and watchlist for Omarchy</span></h1>
       <p class="lead">Today's move in your bar, and a chart you can scrub a click away.</p>
-      <p class="answer">Stonks is a free stock ticker and watchlist for the Omarchy 4 bar. It follows stocks, ETFs, indexes, and crypto, in your theme's colours, with no account and no API key.</p>
+      <p class="answer">Stonks is a free stock ticker and watchlist for the Omarchy 4 bar. It follows stocks, ETFs, indexes, and crypto, in your theme's colors, with no account and no API key.</p>
       <div class="term" data-copy>
         <div class="term-bar"><span>INSTALL</span><button type="button" class="copy">Copy</button></div>
         <pre><code><span class="prompt" aria-hidden="true">$ </span>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span><span class="cursor" aria-hidden="true"></span></code></pre>
       </div>
-      <p class="fine">Needs Omarchy 4, which asks you to confirm, then where in the bar to put the pill.</p>
+      <p class="fine">Needs Omarchy 4, which asks you to confirm, then where in the bar to put the pill. Stonks is on the <a href="https://plugins.omarchy.org/plugin.html?id=grvc.stonks">Omarchy plugin marketplace</a>.</p>
     </div>
 
     <figure class="demo-wrap">
       <div class="demo-tag" aria-hidden="true">DEMO · MADE-UP PRICES</div>
       <div class="popup" id="demo" role="group" aria-label="A working copy of Stonks' popup, with made-up symbols and prices"></div>
-      <figcaption>Made-up symbols and prices. Point at the chart to scrub back through the day, and click the bull or the bear to replay it. Press <kbd>?</kbd> for keys.</figcaption>
+      <figcaption>Made-up symbols and prices. Point at the chart to scrub back through the day, and click the bull or the bear to replay it. Once you've clicked on the page, it sounds as Stonks does: the speaker, or <kbd>m</kbd>, turns that off. Press <kbd>?</kbd> for keys.</figcaption>
     </figure>
   </div>
   <canvas class="skyline" aria-hidden="true"></canvas>
@@ -128,7 +131,7 @@
   <div class="stage day-head">
     <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="1" data-cell="6" aria-hidden="true"></span><span class="sr">1</span><span>ONE DAY</span></p>
     <h2 id="day-title">A Tuesday, from pre-market to after hours.</h2>
-    <p class="note day-hint">Scroll through a made-up day.</p>
+    <p class="note day-hint">Scroll through a made-up day, with the bell at the open and the close, or <a href="#bar">skip it</a>.</p>
   </div>
   <div class="day-track">
     <div class="day-sticky">
@@ -164,35 +167,86 @@
   <p class="note">Here, scroll over the pill to step through the made-up stocks, and click it to change its form. In your bar, that's a middle-click. The animal is the bull on an up day and the bear on a down one.</p>
 </section>
 
+<section class="stage" id="sound">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="3" data-cell="6" aria-hidden="true"></span><span class="sr">3</span><span>SOUND TEST</span></p>
+  <h2>A chart you can hear.</h2>
+  <div class="split">
+    <div>
+      <p class="wide">Run the pointer along the chart and it plays like a row of chimes, higher where the line is higher, and each step of <kbd>←</kbd> <kbd>→</kbd> rings too. A replay sweeps the chimes along the line. Smooth and retro each have their own voice.</p>
+      <ul class="plain-list">
+        <li>A short sound when you add a symbol, remove a row, or undo the removal, which plays the removal backwards, and a shutter when you take a screenshot.</li>
+        <li>A soft bell as the market opens and as it closes, never while every screen is off or an app records from your microphone.</li>
+        <li>Nothing else sounds by itself: no refresh or price.</li>
+        <li>Click the speaker at the top right, or press <kbd>m</kbd>, to turn them off. Your system volume sets how loud they are.</li>
+      </ul>
+    </div>
+    <div class="sound-test">
+      <div class="demo-tag" aria-hidden="true">MADE-UP PRICES</div>
+      <canvas class="chimes" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-label="A made-up day's chart. Point along it, or press the left and right arrows, to hear its chimes."></canvas>
+      <div class="pads" role="group" aria-label="Stonks' sounds">
+        <button type="button" data-sound="add">Add</button>
+        <button type="button" data-sound="remove">Remove</button>
+        <button type="button" data-sound="undo">Undo</button>
+        <button type="button" data-sound="shutter">Shutter</button>
+        <button type="button" data-sound="bell">Bell</button>
+        <button type="button" data-sound="replay">Replay</button>
+      </div>
+      <p class="note sound-state" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<section class="stage" id="screenshot">
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="4" data-cell="6" aria-hidden="true"></span><span class="sr">4</span><span>SCREENSHOTS</span></p>
+  <h2>A picture of the chart, laid out to share.</h2>
+  <div class="split">
+    <div>
+      <p class="wide">Click the camera at the top right, or press <kbd>Ctrl+C</kbd>, for a picture of the chart you're looking at.</p>
+      <ul class="plain-list">
+        <li>The price large with its currency, its move, the day's bull or bear, the exchange, and the time of the price with its zone.</li>
+        <li>On a longer range, its high and low on the chart. At the foot, the day's date or the range's length.</li>
+        <li>Scrubbed, it shows the moment you scrubbed to. Your list is never in it.</li>
+        <li>It lands where Omarchy's own screenshots do: a file in your screenshots folder, the picture on the clipboard, and a notification that opens it in your screenshot editor.</li>
+      </ul>
+    </div>
+    <figure class="share-shot">
+      <img data-look-src="img/screenshot-{look}.webp" src="img/screenshot-retro.webp" width="2400" height="1350" loading="lazy" alt="The picture Stonks made of SPY on Wednesday 7 October 2026 at 14:55 New York time, in retro: 777.56 USD, down 0.20% from the previous close of 779.09, the bear, and the day's chart from midnight.">
+      <figcaption>A picture Stonks made of SPY's day, from real past prices.</figcaption>
+    </figure>
+  </div>
+</section>
+
 <section class="stage" id="label">
-  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="3" data-cell="6" aria-hidden="true"></span><span class="sr">3</span><span>ON THE LABEL</span></p>
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="5" data-cell="6" aria-hidden="true"></span><span class="sr">5</span><span>ON THE LABEL</span></p>
   <h2>What's in the cartridge.</h2>
   <div class="cart">
     <ul class="label-list">
-      <li>Click the pill for the day's chart and scrub it with the pointer. Charts go from one day to all time.</li>
-      <li>Pre-market, after-hours, and overnight prices, and when the market opens or closes.</li>
+      <li>Click the pill for the day's chart and scrub it with the pointer. Charts go from one day to all time, each with its high and low marked.</li>
+      <li>Pre-market, after-hours, and overnight prices, and when the market opens or closes. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.</li>
       <li>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency.</li>
+      <li>The past 52 weeks' low and high, beside the market cap and P/E.</li>
       <li>A tiled window too: the popup's chart and rows at the window's width.</li>
-      <li>An old price says "As of" and its time. A refresh that fails puts a "!" on the pill.</li>
+      <li>An old price says "As of" and its time, and a refresh that fails puts a "!" on the pill. When Yahoo sends no prices at all, the header says "Can't get prices" once, not on every row.</li>
       <li>No account and no API key.</li>
     </ul>
     <div class="not-label">
       <p class="not-title">NOT IN THE CARTRIDGE</p>
-      <p>Stonks doesn't track holdings, send price alerts, or convert currencies.</p>
+      <p>Stonks doesn't track holdings, send price alerts, or convert prices into another currency.</p>
     </div>
   </div>
 </section>
 
 <section class="stage" id="lists">
-  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="4" data-cell="6" aria-hidden="true"></span><span class="sr">4</span><span>YOUR LISTS</span></p>
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="6" data-cell="6" aria-hidden="true"></span><span class="sr">6</span><span>YOUR LISTS</span></p>
   <h2>Lists of your own.</h2>
   <div class="split">
     <div>
       <p class="wide">All holds every symbol you follow. Your own lists, such as a portfolio or a sector, hold some of them. Click the list's name to switch lists, start one, or manage them.</p>
       <ul class="plain-list">
         <li>Ctrl-click a row to choose the lists it's in.</li>
-        <li>Removing a symbol from All removes it everywhere.</li>
+        <li>Remove a row with the × beside its symbol, or <kbd>Delete</kbd>. Right-click it to choose where it goes from, such as "Remove from all 3 lists". Removing a symbol from All removes it everywhere.</li>
         <li>Removed one by mistake? For 5 seconds, "Undo NVDA" shows beside "+ Add a symbol": click it to bring the row back. Until a list next changes, <kbd>Ctrl+Z</kbd> does the same.</li>
+        <li>Click the sign at the end of the list's header to show every row's move as a percent, an amount, or since the open.</li>
         <li>Sort by symbol, name, or change, or keep your own order.</li>
       </ul>
     </div>
@@ -204,9 +258,9 @@
 </section>
 
 <section class="stage" id="themes">
-  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="5" data-cell="6" aria-hidden="true"></span><span class="sr">5</span><span>SELECT YOUR THEME</span></p>
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="7" data-cell="6" aria-hidden="true"></span><span class="sr">7</span><span>SELECT YOUR THEME</span></p>
   <h2>Smooth or retro, in your theme.</h2>
-  <p class="wide">Retro draws the price in block digits and the charts in pixel columns, the way Omarchy draws its logo. Smooth draws them in lines. Both draw in your theme's colours, light themes too.</p>
+  <p class="wide">Stonks opens in retro: the price in block digits and the charts in pixel columns, the way Omarchy draws its logo. Smooth draws them in lines. Both draw in your theme's colors, light themes too.</p>
   <div class="select">
     <div class="picker">
       <p class="pick-title">LOOK</p>
@@ -221,14 +275,14 @@
       <div class="chips" data-group="light" role="group" aria-label="Light themes"></div>
     </div>
     <figure class="theme-shot">
-      <div class="theme-ground"><img alt="" width="944" height="1308" loading="lazy"></div>
-      <figcaption></figcaption>
+      <div class="theme-ground"><img src="img/themes/tokyo-night-retro.webp" alt="Stonks' popup in retro, in the Tokyo Night theme: the price, the day's chart, and the list." width="944" height="1364" loading="lazy"></div>
+      <figcaption>Tokyo Night, retro.</figcaption>
     </figure>
   </div>
 </section>
 
 <section class="stage" id="keys">
-  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="6" data-cell="6" aria-hidden="true"></span><span class="sr">6</span><span>MOVE LIST</span></p>
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="8" data-cell="6" aria-hidden="true"></span><span class="sr">8</span><span>MOVE LIST</span></p>
   <h2>Play it with the keys.</h2>
   <p class="wide">Press <kbd>?</kbd> in the popup for a sheet of every key, the same as this list.</p>
   <dl class="moves">
@@ -254,35 +308,36 @@
     <div data-keys="?"><dt><kbd>?</kbd></dt><dd>All keys</dd></div>
     <div data-keys="Escape"><dt><kbd>Esc</kbd></dt><dd>Close</dd></div>
   </dl>
-  <p class="note keys-only">Press one of these keys to light up its move.</p>
+  <p class="note keys-only">Press one of these keys to light up its move. On this page, <kbd>s</kbd> and <kbd>m</kbd> work too.</p>
 </section>
 
 <section class="stage" id="rules">
-  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="7" data-cell="6" aria-hidden="true"></span><span class="sr">7</span><span>HOUSE RULES</span></p>
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="9" data-cell="6" aria-hidden="true"></span><span class="sr">9</span><span>HOUSE RULES</span></p>
   <h2>What Stonks runs, fetches, and writes.</h2>
   <dl class="rules">
     <div><dt>PRICES</dt><dd>Quotes, charts, and search come from Yahoo's unofficial endpoints, and overnight prices from Robinhood. Either may change or stop without notice.</dd></div>
     <div><dt>DELAYS</dt><dd>Yahoo delays many exchanges' quotes, London's and Tokyo's among them, by up to 30 minutes. Any price more than two minutes old while its market trades says "As of" and its time.</dd></div>
-    <div><dt>RUNS</dt><dd><code>curl</code> for every request. <code>omarchy restart shell</code>, only when you click the notice that an update is on disk. <code>omarchy plugin update grvc.stonks</code>, in a terminal, only when you click the note that a newer Stonks is out.</dd></div>
+    <div><dt>RUNS</dt><dd><code>curl</code> for every request. PipeWire's <code>pw-play</code> for each sound, <code>pw-cat</code> playing silence while you scrub, so each chime plays at once, and <code>pw-dump</code> as a bell is due, to see whether an app records from a microphone. For a screenshot, <code>wl-copy</code> to put it on the clipboard, and Omarchy's notification. <code>omarchy restart shell</code>, only when you click the notice that an update is on disk. <code>omarchy plugin update grvc.stonks</code>, in a terminal, only when you click "Update to …" or press <kbd>Shift+U</kbd>.</dd></div>
     <div><dt>SITES</dt><dd><code>query1.finance.yahoo.com</code> for quotes, charts, and the market cap and P/E; <code>query2.finance.yahoo.com</code> for search; <code>api.robinhood.com</code> for overnight prices and which stocks trade overnight; and <code>raw.githubusercontent.com</code> for the newest version number, as the shell starts and then once a day. Nothing else.</dd></div>
-    <div><dt>FILES</dt><dd>Your lists and settings in <code>~/.config/omarchy/grvc.stonks.json</code>, and the last quotes in <code>~/.cache/grvc.stonks/quotes.json</code>.</dd></div>
-    <div><dt>UPDATES</dt><dd>Never by itself. When a newer version is out, the footer says so for 5 seconds.</dd></div>
+    <div><dt>FILES</dt><dd>Your lists and settings in <code>~/.config/omarchy/grvc.stonks.json</code>. In <code>~/.cache/grvc.stonks</code>, the last quotes and, while sounds are on, the sounds it makes from the chart. Each screenshot you take, in the folder Omarchy's own screenshots use.</dd></div>
+    <div><dt>UPDATES</dt><dd>Never by itself. When a newer version is out, the footer offers it.</dd></div>
     <div><dt>ADVICE</dt><dd>None. Stonks isn't investment advice, and isn't affiliated with Yahoo or Robinhood.</dd></div>
   </dl>
 </section>
 
 <section class="stage" id="faq">
-  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="8" data-cell="6" aria-hidden="true"></span><span class="sr">8</span><span>QUESTIONS</span></p>
+  <p class="stage-label"><span class="stage-word">STAGE</span><span class="blocks" data-text="10" data-cell="6" aria-hidden="true"></span><span class="sr">10</span><span>QUESTIONS</span></p>
   <h2>Asked and answered.</h2>
   <div class="faq">
     <section class="qa"><h3>What is Stonks?</h3><p>Stonks is a free stock ticker and watchlist for the Omarchy 4 bar. A small pill shows how a stock is doing today, and a click opens its chart, with your lists under it.</p></section>
     <section class="qa"><h3>How do I install a stock ticker on Omarchy?</h3><p>Install Stonks with one command: <code>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span></code>. It needs Omarchy 4, which asks you to confirm, then where in the bar to put the pill.</p></section>
     <section class="qa"><h3>Does Stonks need an account or an API key?</h3><p>No. Stonks needs no account and no API key.</p></section>
     <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>Stonks gets quotes, charts, and search from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with "As of" and its time.</p></section>
-    <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight.</p></section>
+    <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.</p></section>
     <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts currencies.</p></section>
-    <section class="qa"><h3>Does Stonks track my portfolio or send price alerts?</h3><p>No. Stonks doesn't track holdings, send price alerts, or convert currencies. It shows prices and charts for the stocks you follow.</p></section>
-    <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT licence.</p></section>
+    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Click the speaker at the top right, or press m, to turn them off.</p></section>
+    <section class="qa"><h3>Does Stonks track my portfolio or send price alerts?</h3><p>No. Stonks doesn't track holdings, send price alerts, or convert prices into another currency. It shows prices and charts for the stocks you follow.</p></section>
+    <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT license.</p></section>
   </div>
 </section>
 
@@ -291,7 +346,7 @@
     <span class="sprite" data-sprite="bull" aria-hidden="true"></span>
     <div class="finale-mid">
       <h2 class="freeplay"><span class="blocks" data-text="FREE PLAY" data-cell="10" aria-hidden="true"></span><span class="sr">Free play: install Stonks</span></h2>
-      <p class="coin">No account. No API key. Free, under the MIT licence.</p>
+      <p class="coin">No account. No API key. Free, under the MIT license.</p>
     </div>
     <span class="sprite" data-sprite="bear" aria-hidden="true"></span>
   </div>
@@ -301,7 +356,7 @@
   </div>
   <ol class="steps">
     <li>Omarchy warns that plugins run unsandboxed and asks you to confirm.</li>
-    <li>It asks where in the bar to put the pill. The centre is the default.</li>
+    <li>It asks where in the bar to put the pill. The center is the default.</li>
     <li>Click the pill.</li>
   </ol>
   <p class="fine center">To read the code first, leave out <code class="nw">--enable</code>, say no when Omarchy offers to enable it, and run <code>omarchy plugin enable grvc.stonks</code> when you're ready.</p>
@@ -310,12 +365,13 @@
 </main>
 
 <footer class="foot">
-  <p><a href="https://github.com/gmchande/omarchy-stonks">GitHub</a> · <a href="https://github.com/gmchande/omarchy-stonks#readme">README</a> · <a href="https://github.com/gmchande/omarchy-stonks/issues/new?template=bug.yml">Report a bug</a></p>
-  <p>Stonks is MIT licensed, by Gaurav Chande. It isn't investment advice, and isn't affiliated with Yahoo or Robinhood. Every price this page draws is made up. The pictures are Stonks' own screens, from its test data.</p>
+  <p><a href="https://github.com/gmchande/omarchy-stonks">GitHub</a> · <a href="https://github.com/gmchande/omarchy-stonks#readme">README</a> · <a href="https://plugins.omarchy.org/plugin.html?id=grvc.stonks">Marketplace</a> · <a href="https://github.com/gmchande/omarchy-stonks/issues/new?template=bug.yml">Report a bug</a></p>
+  <p>Stonks is MIT licensed, by Gaurav Chande. It isn't investment advice, and isn't affiliated with Yahoo or Robinhood. Every price this page draws is made up. The pictures are Stonks' own screens, from its test data, and the sounds are its own.</p>
 </footer>
 
 <script src="cells.js"></script>
 <script src="market.js"></script>
+<script src="sound.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -30,6 +30,44 @@
     on(fn) { this.listeners.push(fn); },
   };
 
+  // ---- A chart's scrub and replay, the same on every chart here. A scrub
+  // lands on the print nearest the pointer and strikes the chart's chime
+  // there. A replay is a scrub that drives itself over 2 s on InOutSine, as
+  // Stonks' does, its sound made from the chart as drawn when it starts.
+
+  const REPLAY_MS = 2000;
+  const inOutSine = (u) => -(Math.cos(Math.PI * u) - 1) / 2;
+
+  function nearest(pts, f) {
+    let best = 0;
+    for (let i = 0; i < pts.length; i++) if (Math.abs(pts[i].x - f) < Math.abs(pts[best].x - f)) best = i;
+    return f > pts[pts.length - 1].x ? pts.length - 1 : best;
+  }
+
+  // `step(scrub, reveal)` draws each frame, then (-1, 1) at the end. Returns
+  // the replay's stop, which stops its sound too.
+  function sweep(pts, chart, step) {
+    const from = pts[0].x, to = pts[pts.length - 1].x;
+    Sound.replay(chart, from, to, REPLAY_MS / 1000);
+    const t0 = performance.now();
+    let frame = 0;
+    const tick = (t) => {
+      const f = Math.min(1, (t - t0) / REPLAY_MS);
+      const x = from + inOutSine(f) * (to - from);
+      let i = 0;
+      while (i + 1 < pts.length && pts[i + 1].x <= x) i++;
+      frame = f < 1 ? requestAnimationFrame(tick) : 0;
+      step(f < 1 ? i : -1, f < 1 ? x + 0.0001 : 1);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      if (!frame) return;
+      cancelAnimationFrame(frame);
+      frame = 0;
+      Sound.stopReplay();
+    };
+  }
+
   // ---- History for the ranges: every range is a slice of one made-up
   // history, so a range's high is never above the 52 weeks' it sits in.
 
@@ -60,8 +98,9 @@
     return closes;
   }
 
-  // A range at the hero's clock: its points, and its low and high over
-  // every session in it.
+  // A range at the hero's clock: its points, its low and high (`lo`, `hi`),
+  // and which points they are (`loI`, `hiI`), which the chart marks. The
+  // range's lowest and highest closes are always among its points.
   function rangeSeries(s, key, q) {
     s.ranges = s.ranges || {};
     if (s.ranges[key]) return s.ranges[key];
@@ -84,15 +123,18 @@
     } else {
       const n = Math.min(back, HISTORY_DAYS - 1);
       const step = Math.max(1, Math.round(n / 130));
-      pts = [];
-      for (let j = n; j >= 1; j -= step) pts.push({ v: closes[HISTORY_DAYS - j], d: SESSIONS[j] });
+      const span = closes.slice(HISTORY_DAYS - n);
+      const days = new Set([n - span.indexOf(Math.max(...span)), n - span.indexOf(Math.min(...span))]);
+      for (let j = n; j >= 1; j -= step) days.add(j);
+      pts = [...days].sort((a, b) => b - a).map((j) => ({ v: closes[HISTORY_DAYS - j], d: SESSIONS[j] }));
       pts.push({ v: q.price, d: SESSIONS[0] });
     }
     pts.forEach((p, i) => { p.x = i / (pts.length - 1); });
-    const all = (key === "1W" ? pts.slice() : closes.slice(HISTORY_DAYS - Math.min(back, HISTORY_DAYS - 1)).map((c) => ({ v: c }))
-      .concat(rangeSeries(s, "1W", q))).concat(today);
-    pts.lo = Math.min(...all.map((p) => p.v));
-    pts.hi = Math.max(...all.map((p) => p.v));
+    const values = pts.map((p) => p.v);
+    pts.lo = Math.min(...values);
+    pts.hi = Math.max(...values);
+    pts.loI = values.indexOf(pts.lo);
+    pts.hiI = values.indexOf(pts.hi);
     s.ranges[key] = pts;
     return pts;
   }
@@ -110,37 +152,49 @@
     toSmooth: `<svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1,12 6,6 10,9 17,2"/></svg>`,
     toRetro: () => Cells.markSVG(2, 7, "currentColor", false),
   };
+  // The rows' unit, as the sign at the end of the list's header says it.
+  const UNITS = [["pct", "percents"], ["abs", "amounts"], ["open", "since the open"]];
 
   class Popup {
     constructor(root, { symbols, clock, full, holdScale }) {
       this.root = root;
-      this.symbols = symbols;
+      this.all = symbols;
+      this.symbols = symbols.slice(); // the rows listed; a removal takes one out
       this.clock = clock;
       this.full = full;
       this.holdScale = holdScale;
       this.sym = 0;
       this.sel = 0;
       this.range = "1D"; // every stock shows the range picked
-      this.changeMode = 0;
+      this.changeMode = 0; // the rows', and on 1D the price's: UNITS
       this.scrub = -1;
       this.reveal = 1;
-      this.replayFrame = null;
+      this.stopSweep = null;
+      this.chart = null; // what the chart drew, which its chimes play
+      this.chimed = -1;
       this.scrubMinute = null;
+      this.removed = []; // what "+ Add a symbol" puts back, the latest last
+      this.undoable = null; // the removal Ctrl+Z undoes, until the list next changes
+      this.timers = {};
       this.build();
       Look.on(() => this.render());
     }
 
     build() {
       const r = this.root;
+      const tool = (cls, label, inner = "") => `<button type="button" class="tool ${cls}" aria-label="${label}" data-tip="${label}">${inner}</button>`;
       r.innerHTML = `
         <div class="pop-head">
           <button type="button" class="animal"></button>
           <span class="zz" aria-hidden="true"></span>
-          <span class="status"></span>
+          <span class="head-words"><span class="title"></span><span class="status"></span></span>
           <span class="head-tools">
-            <button type="button" class="look"></button>
-            ${this.full ? `<button type="button" class="help" aria-label="Show the demo's keys">?</button>` : ""}
+            <button type="button" class="tool" data-sound-toggle><span class="speaker-icon" aria-hidden="true"></span></button>
+            ${this.full ? tool("camera", "Take a screenshot") : ""}
+            ${tool("look", "")}
+            ${this.full ? tool("help", "Show all keys", "?") : ""}
           </span>
+          ${this.full ? `<p class="toast" hidden></p>` : ""}
         </div>
         <div class="listing"></div>
         <div class="hero-row">
@@ -152,48 +206,71 @@
         ${this.full ? `
         <div class="ranges" role="group" aria-label="Chart range">${RANGES.map(([k]) => `<button type="button" data-range="${k}">${k}</button>`).join("")}</div>
         <div class="info"></div>
-        <div class="breadth"><span>ALL</span><span>TODAY</span><canvas class="breadth-rule" aria-hidden="true"></canvas></div>
-        <div class="rows" role="group" aria-label="Made-up watchlist">${this.symbols.map((s) => `
-          <button type="button" class="row"><span class="who"><span class="sym">${s.sym}</span><span class="name">${s.name}</span></span><canvas aria-hidden="true"></canvas><span class="nums"><span></span><b></b></span></button>`).join("")}
-        </div>
+        <div class="list-head"><span class="list-name">ALL</span><span>TODAY</span><canvas class="breadth-rule" aria-hidden="true"></canvas>${tool("unit", "")}</div>
+        <div class="rows" role="group" aria-label="Made-up watchlist"></div>
+        <div class="pop-foot"><button type="button" class="add">+ Add a symbol</button><button type="button" class="undo" hidden></button></div>
         <div class="sheet" hidden>
           <p class="sheet-title">KEYS · THIS DEMO</p>
           <dl>
-            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one chart step</dd>
-            <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the chart range</dd>
             <dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move the selection</dd>
-            <dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd>
-            <dt><kbd>1</kbd>–<kbd>4</kbd></dt><dd>Show that row's chart</dd>
+            <dt><kbd>⏎</kbd></dt><dd>Show the row's chart</dd>
+            <dt><kbd>a</kbd></dt><dd>Add a symbol: here, put one back</dd>
+            <dt><kbd>Del</kbd> <kbd>⌫</kbd></dt><dd>Remove the selected row</dd>
+            <dt><kbd>Ctrl+Z</kbd></dt><dd>Undo a removal</dd>
+            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one step</dd>
+            <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the range</dd>
             <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Show the day's change as a percent, an amount, or since the open</dd>
-            <dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd>
+            <dt><kbd>c</kbd></dt><dd>Cycle the day's change</dd>
+            <dt><kbd>s</kbd></dt><dd>Smooth or retro</dd>
+            <dt><kbd>m</kbd></dt><dd>Sound on or off</dd>
             <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
           </dl>
         </div>` : ""}`;
       const $ = (sel) => r.querySelector(sel);
       this.el = {
-        animal: $(".animal"), zz: $(".zz"), status: $(".status"), look: $(".look"), help: $(".help"),
-        listing: $(".listing"), price: $(".price"), change: $(".change"), ext: $(".ext"),
-        cap: $(".change-cap"), chart: $(".chart"), ranges: $(".ranges"), info: $(".info"),
-        breadth: $(".breadth-rule"), rows: $(".rows"), sheet: $(".sheet"),
+        animal: $(".animal"), zz: $(".zz"), title: $(".title"), status: $(".status"), look: $(".look"), help: $(".help"),
+        camera: $(".camera"), toast: $(".toast"), listing: $(".listing"), price: $(".price"), change: $(".change"),
+        ext: $(".ext"), cap: $(".change-cap"), chart: $(".chart"), ranges: $(".ranges"), info: $(".info"),
+        breadth: $(".breadth-rule"), unit: $(".unit"), rows: $(".rows"), add: $(".add"), undo: $(".undo"), sheet: $(".sheet"),
       };
       const el = this.el;
       el.animal.addEventListener("click", () => this.replay());
       el.look.addEventListener("click", () => Look.toggle());
-      el.change.addEventListener("click", () => this.cycleChange());
+      el.change.addEventListener("click", () => { if (this.range === "1D") this.cycleChange(); });
       el.chart.addEventListener("pointermove", (e) => this.scrubAt(e.clientX));
       el.chart.addEventListener("pointerdown", (e) => this.scrubAt(e.clientX));
-      el.chart.addEventListener("pointerleave", () => { if (this.scrub >= 0 && this.replayFrame === null) this.endScrub(); });
+      el.chart.addEventListener("pointerleave", () => { if (this.scrub >= 0 && !this.stopSweep) this.endScrub(); });
       r.addEventListener("keydown", (e) => this.key(e));
       if (this.full) {
         el.help.addEventListener("click", () => this.toggleSheet());
         el.sheet.addEventListener("click", () => this.toggleSheet(false));
+        el.camera.addEventListener("click", () => this.screenshot());
         el.ranges.addEventListener("click", (e) => { const b = e.target.closest("[data-range]"); if (b) this.setRange(b.dataset.range); });
-        [...el.rows.children].forEach((row, i) => {
-          row.addEventListener("click", () => { this.sel = i; this.setSymbol(i); });
-          row.addEventListener("focus", () => { if (this.sel !== i) { this.sel = i; this.renderRows(); } });
+        el.unit.addEventListener("click", () => this.cycleChange());
+        el.add.addEventListener("click", () => this.putBack());
+        el.undo.addEventListener("click", () => this.undo());
+        // The row that slides into a removed one's place shows its × only
+        // once the pointer moves, so a second click can't remove it.
+        el.rows.addEventListener("pointermove", () => el.rows.classList.remove("calm"));
+        el.rows.addEventListener("click", (e) => {
+          const slot = e.target.closest(".row-slot");
+          if (!slot) return;
+          const i = [...el.rows.children].indexOf(slot);
+          if (e.target.closest(".x")) this.remove(i);
+          else { this.sel = i; this.setSymbol(i); }
         });
+        el.rows.addEventListener("focusin", (e) => {
+          const i = [...el.rows.children].indexOf(e.target.closest(".row-slot"));
+          if (i >= 0 && this.sel !== i && e.target.classList.contains("row")) { this.sel = i; this.renderRows(); }
+        });
+        this.buildRows();
       }
+    }
+
+    buildRows() {
+      const one = this.symbols.length === 1;
+      this.el.rows.innerHTML = this.symbols.map((s) => `
+        <div class="row-slot"><button type="button" class="row"><span class="who"><span class="sym">${s.sym}</span><span class="name">${s.name}</span></span><canvas aria-hidden="true"></canvas><span class="nums"><span></span><b></b></span></button>${one ? "" : `<button type="button" class="x" aria-label="Remove ${s.sym}" data-tip="Remove"></button>`}</div>`).join("");
     }
 
     feat() { return this.symbols[this.sym]; }
@@ -218,9 +295,17 @@
 
     priceCell() {
       // One cell size for every symbol, so the price never moves the layout.
-      const widest = Math.max(...this.symbols.map((s) => Cells.blockCells(money(s.prev * 1.03)).columns));
+      const widest = Math.max(...this.all.map((s) => Cells.blockCells(money(s.prev * 1.03)).columns));
       const room = this.root.clientWidth - 44 - (innerWidth <= 640 ? 100 : 140);
       return Math.max(4, Math.min(11, Math.floor(room / widest)));
+    }
+
+    // A move from `from` to `to` in the unit shown: a percent, an amount, or
+    // a percent from `open`.
+    moved(to, from, open, mode) {
+      if (mode === 2 && open !== null) return { n: ((to - open) / open) * 100, pct: true };
+      if (mode === 1) return { n: to - from, pct: false };
+      return { n: ((to - from) / from) * 100, pct: true };
     }
 
     render() {
@@ -252,26 +337,28 @@
         el.animal.setAttribute("aria-label", `Replay the chart (the ${dir === "up" ? "bull" : "bear"}${asleep ? ", asleep" : ""})`);
       }
       el.zz.innerHTML = asleep && dir ? Cells.spriteSVG(Cells.SLEEP_Z, 2, rgba(COL.fg, 0.5)) : "";
+      el.title.textContent = s.name;
       el.status.textContent = status;
 
       el.look.innerHTML = retro ? LOOK_ICONS.toSmooth : LOOK_ICONS.toRetro();
       el.look.setAttribute("aria-label", retro ? "Switch to smooth" : "Switch to retro");
-      el.listing.innerHTML = `<b>${s.sym}</b>${s.name.toUpperCase()} · DEMO · USD`;
+      el.look.dataset.tip = el.look.getAttribute("aria-label");
+      if (el.help) el.help.dataset.tip = el.sheet.hidden ? "Show all keys" : "Hide the keys";
+      if (el.camera && !this.timers.toast) el.camera.innerHTML = Cells.iconSVG("camera", 3, "currentColor");
+      el.listing.innerHTML = `<b>${s.sym}</b>DEMO · USD`;
 
       const priceText = money(shown);
       el.price.innerHTML = retro
         ? Cells.blocksSVG(priceText, this.priceCell(), COL.fg, 6)
         : `<span class="smooth-price">${priceText}</span>`;
 
-      const canOpen = day && q.open !== null;
-      if (this.changeMode === 2 && !canOpen) this.changeMode = 0;
+      // On a longer range the price's change is the range's; the rows stay
+      // on the day's move.
+      if (this.changeMode === 2 && q.open === null && !this.full) this.changeMode = 0;
       const mode = day ? this.changeMode : 0;
-      let delta;
-      if (mode === 2) delta = ((shown - q.open) / q.open) * 100;
-      else if (mode === 1) delta = shown - base;
-      else delta = ((shown - base) / base) * 100;
-      el.change.textContent = signed(delta, retro, mode === 1 ? "" : "%");
-      el.change.className = `change ${tone(delta) || "flat"}`;
+      const move = this.moved(shown, base, day ? q.open : null, mode);
+      el.change.textContent = signed(move.n, retro, move.pct ? "%" : "");
+      el.change.className = `change ${tone(move.n) || "flat"}`;
       el.change.disabled = !day;
       el.change.setAttribute("aria-label", `${el.change.textContent}. ${day ? "Show the change as a percent, an amount, or since the open." : ""}`);
 
@@ -280,13 +367,13 @@
         const extDelta = mode === 1 ? ext.v - q.price : ext.pct;
         el.ext.innerHTML = `${ext.label} <b>${money(ext.v)}</b> <span class="${tone(ext.pct) || "flat"}">${signed(extDelta, retro, mode === 1 ? "" : "%")}</span>`;
       } else el.ext.textContent = "";
-      el.cap.textContent = mode === 2 ? "SINCE OPEN" : !scrubbed && day ? q.caption : "";
+      el.cap.textContent = !day ? key : mode === 2 && q.open !== null ? "SINCE OPEN" : !scrubbed ? q.caption : "";
 
-      this.drawChart({ q, pts, base, day });
+      this.drawChart({ s, q, pts, base, day, key });
 
       if (this.full) {
         for (const b of el.ranges.children) b.setAttribute("aria-pressed", String(b.dataset.range === key));
-        this.renderInfo(s, q, pts, key);
+        this.renderInfo(s, q, pts, key, shown);
         this.renderRows();
       }
 
@@ -297,38 +384,55 @@
       this.onRender && this.onRender();
     }
 
-    drawChart({ q, pts, base, day }) {
+    drawChart({ s, q, pts, base, day, key }) {
       const { ctx, w, h } = Cells.fit(this.el.chart);
-      const s = this.feat();
+      const mark = (i, low) => ({ i, low, value: money(pts[i].v), date: `${pts[i].d.getDate()} ${MONTHS[pts[i].d.getMonth()]} ${pts[i].d.getFullYear()}` });
       const o = {
         scrub: this.scrub,
         reveal: this.reveal,
         lastCap: day && this.scrub < 0 ? q.lastRegular : -1,
         ticks: day ? Market.BELLS : [],
         scale: day && this.holdScale ? s.prints : null,
+        marks: day ? null : [mark(pts.hiI, false), mark(pts.loI, true)],
       };
-      if (Look.retro) Cells.drawRetro(ctx, w, h, pts, base, { ...o, pixel: 6, gap: 1, ghost: 0.035 });
-      else Cells.drawSmooth(ctx, w, h, pts, base, o);
+      this.chart = Look.retro
+        ? Cells.drawRetro(ctx, w, h, pts, base, { ...o, pixel: 6, gap: 1, ghost: 0.035 })
+        : Cells.drawSmooth(ctx, w, h, pts, base, o);
     }
 
-    renderInfo(s, q, pts, key) {
+    // The lines under the ranges: the range's low and high with the price
+    // between, beside its open (on 1D) or START, and its volume; then the
+    // past 52 weeks', beside the market cap and P/E.
+    renderInfo(s, q, pts, key, shown) {
       const retro = Look.retro;
-      const year = rangeSeries(s, "1Y", q);
-      const lines = key === "1D"
-        ? [["1D", q.low, q.high], ["52W", year.lo, year.hi]]
-        : [[key, pts.lo, pts.hi], ["52W", year.lo, year.hi]];
-      this.el.info.innerHTML = lines.map(([label]) => `<span>${label}</span><b></b><canvas aria-hidden="true"></canvas><b></b>`).join("");
+      const day = key === "1D";
+      const week = rangeSeries(s, "1W", q), year = rangeSeries(s, "1Y", q);
+      const yearLo = Math.min(year.lo, week.lo, q.low ?? Infinity), yearHi = Math.max(year.hi, week.hi, q.high ?? -Infinity);
+      const sessions = day ? 0 : RANGES.find((r) => r[0] === key)[1];
+      const lines = [
+        [key, day ? q.low : pts.lo, day ? q.high : pts.hi,
+          day ? "Open" : "Start", day ? (q.open === null ? "" : money(q.open)) : money(pts[0].v),
+          "Vol", Market.big(day ? q.volume : s.vol * Math.min(sessions, HISTORY_DAYS) * 0.94 + q.volume)],
+        ["52W", yearLo, yearHi, "Mkt cap", `USD ${Market.big(s.shares * shown)}`, "P/E", (shown / s.eps).toFixed(1)],
+      ];
+      this.el.info.innerHTML = lines.map(([label, , , k1, v1, k2, v2]) =>
+        `<span>${label}</span><b></b><canvas aria-hidden="true"></canvas><b></b><span class="fact">${k1}</span><b class="fact">${v1}</b><span class="fact">${k2}</span><b class="fact">${v2}</b>`).join("");
       const kids = this.el.info.children;
       lines.forEach(([, lo, hi], k) => {
-        kids[k * 4 + 1].textContent = lo === null ? "" : money(lo);
-        kids[k * 4 + 3].textContent = hi === null ? "" : money(hi);
-        Cells.drawRule(kids[k * 4 + 2], retro, [[1, COL.fg, 0.14]], lo === null ? null : (q.price - lo) / (hi - lo || 1));
+        kids[k * 8 + 1].textContent = lo === null ? "" : money(lo);
+        kids[k * 8 + 3].textContent = hi === null ? "" : money(hi);
+        Cells.drawRule(kids[k * 8 + 2], retro, [[1, COL.fg, 0.14]], lo === null ? null : (shown - lo) / (hi - lo || 1));
       });
       const pcts = this.symbols.map((x) => this.rowReading(x).pct);
       const ups = pcts.filter((p) => tone(p) === "up").length;
       const downs = pcts.filter((p) => tone(p) === "down").length;
       const n = pcts.length;
       Cells.drawRule(this.el.breadth, retro, [[ups / n, COL.up, 1], [(n - ups - downs) / n, COL.fg, 0.14], [downs / n, COL.down, 1]]);
+      const [unit] = UNITS[this.changeMode];
+      const [, next] = UNITS[(this.changeMode + 1) % UNITS.length];
+      this.el.unit.innerHTML = Cells.iconSVG(unit, 3, "currentColor");
+      this.el.unit.dataset.tip = `Show ${next}`;
+      this.el.unit.setAttribute("aria-label", `Show every row's change ${next === "since the open" ? next : `as ${next}`}`);
     }
 
     // A row's figures: today's, or, while the day is scrubbed, its price at
@@ -337,24 +441,107 @@
       const q = Market.quoteAt(s, this.clock);
       if (this.scrubMinute === null) return q;
       const v = Market.priceAt(q.prints, s.prev, this.scrubMinute);
-      return { prints: q.prints, price: v, pct: ((v - s.prev) / s.prev) * 100 };
+      return { prints: q.prints, price: v, open: q.open, pct: ((v - s.prev) / s.prev) * 100 };
     }
 
     renderRows() {
       const retro = Look.retro;
-      [...this.el.rows.children].forEach((row, i) => {
+      [...this.el.rows.children].forEach((slot, i) => {
         const s = this.symbols[i];
         const q = this.rowReading(s);
+        const row = slot.firstElementChild;
         row.setAttribute("aria-current", String(i === this.sym));
         row.classList.toggle("selected", i === this.sel && i !== this.sym);
         const nums = row.querySelector(".nums");
+        const move = this.moved(q.price, s.prev, q.open, this.changeMode);
         nums.firstElementChild.textContent = money(q.price);
-        nums.lastElementChild.textContent = signed(q.pct, retro, "%");
-        nums.lastElementChild.className = tone(q.pct) || "flat";
+        nums.lastElementChild.textContent = signed(move.n, retro, move.pct ? "%" : "");
+        nums.lastElementChild.className = tone(move.n) || "flat";
         const { ctx, w, h } = Cells.fit(row.querySelector("canvas"));
         if (retro) Cells.drawRetro(ctx, w, h, q.prints, s.prev, { pixel: 2, gap: 1, scrub: -1, scale: s.prints });
         else Cells.drawSmooth(ctx, w, h, q.prints, s.prev, { pad: 2, scrub: -1, lineWidth: 1.2, scale: s.prints });
+        // The × sits beside the symbol: a pixel × in retro, the sign in smooth.
+        const x = slot.querySelector(".x");
+        if (x) {
+          const sym = row.querySelector(".sym");
+          x.style.left = `${sym.offsetLeft + sym.offsetWidth + 8}px`;
+          x.innerHTML = retro ? Cells.spriteSVG(Cells.REMOVE, 2, "currentColor") : "×";
+        }
       });
+    }
+
+    // A note under the header's icons for a few seconds, as Omarchy's
+    // notification shows after a screenshot.
+    toast(html, ms) {
+      clearTimeout(this.timers.toast);
+      this.el.toast.innerHTML = html;
+      this.el.toast.hidden = false;
+      this.timers.toast = setTimeout(() => {
+        this.el.toast.hidden = true;
+        this.timers.toast = 0;
+        this.render();
+      }, ms);
+    }
+
+    // In Stonks the camera saves a picture of the chart; here it sounds the
+    // shutter and points to one Stonks made.
+    screenshot() {
+      Sound.play(Look.retro, "shutter");
+      this.el.camera.innerHTML = Cells.iconSVG("cameraLit", 3, "currentColor");
+      this.root.classList.remove("flash");
+      void this.root.offsetWidth;
+      this.root.classList.add("flash");
+      this.toast(`In Stonks, a picture of this chart. <a href="#screenshot">See one</a>`, 5000);
+    }
+
+    // A removal takes the row out, and for 5 seconds "Undo …" shows beside
+    // "+ Add a symbol"; Ctrl+Z undoes it until the list next changes.
+    remove(i) {
+      if (this.symbols.length < 2) return;
+      const [s] = this.symbols.splice(i, 1);
+      this.removed.push({ s, at: i });
+      this.undoable = { s, at: i };
+      if (this.sym > i || this.sym === this.symbols.length) this.sym--;
+      if (this.sel > i || this.sel === this.symbols.length) this.sel--;
+      Sound.play(Look.retro, "remove");
+      clearTimeout(this.timers.undo);
+      this.el.undo.textContent = `Undo ${s.sym}`;
+      this.el.undo.hidden = false;
+      this.timers.undo = setTimeout(() => { this.el.undo.hidden = true; }, 5000);
+      this.listChanged();
+      this.el.rows.classList.add("calm");
+    }
+    // A removed row back in its old place.
+    restore({ s, at }) {
+      this.removed = this.removed.filter((r) => r.s !== s);
+      const place = Math.min(at, this.symbols.length);
+      this.symbols.splice(place, 0, s);
+      if (this.sym >= place) this.sym++;
+      if (this.sel >= place) this.sel++;
+      this.undoable = null;
+      clearTimeout(this.timers.undo);
+      this.el.undo.hidden = true;
+      this.listChanged();
+    }
+    undo() {
+      if (!this.undoable) return;
+      Sound.play(Look.retro, "undo");
+      this.restore(this.undoable);
+    }
+    // "+ Add a symbol" searches in Stonks; the demo's four are all it has,
+    // so it puts back the one removed last.
+    putBack() {
+      const last = this.removed[this.removed.length - 1];
+      if (!last) {
+        this.toast("In Stonks, this searches for any stock, ETF, index, or coin.", 3000);
+        return;
+      }
+      Sound.play(Look.retro, "add");
+      this.restore(last);
+    }
+    listChanged() {
+      this.buildRows();
+      this.render();
     }
 
     setSymbol(i) {
@@ -374,65 +561,70 @@
       const k = keys.indexOf(this.range);
       this.setRange(keys[Math.max(0, Math.min(keys.length - 1, k + d))]);
     }
+    // The change's unit steps: a percent, an amount, since the open.
     cycleChange() {
-      if (this.range !== "1D") return;
-      const canOpen = this.quote().open !== null;
+      const canOpen = this.full || this.quote().open !== null;
       this.changeMode = (this.changeMode + 1) % (canOpen ? 3 : 2);
       this.render();
     }
     endScrub() {
       this.stopReplay();
       this.scrub = -1;
+      this.chimed = -1;
       this.render();
+    }
+
+    // The scrub moved onto print `i`: the pointer strikes a bar as it moves
+    // onto it, and each key step, `again`, strikes the same bar too.
+    scrubTo(i, again) {
+      this.stopReplay();
+      this.scrub = i;
+      this.render();
+      const { pts } = this.series();
+      const bar = Sound.barAt(this.chart, pts[i].x);
+      if (bar !== this.chimed || again) Sound.chime(Look.retro, bar);
+      this.chimed = bar;
     }
 
     scrubAt(clientX) {
       const { pts } = this.series();
       if (!pts.length) return;
       const r = this.el.chart.getBoundingClientRect();
-      const f = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-      let best = 0;
-      for (let i = 0; i < pts.length; i++) if (Math.abs(pts[i].x - f) < Math.abs(pts[best].x - f)) best = i;
-      if (f > pts[pts.length - 1].x) best = pts.length - 1;
-      this.stopReplay();
-      this.scrub = best;
-      this.render();
+      this.scrubTo(nearest(pts, Math.max(0, Math.min(1, (clientX - r.left) / r.width))), false);
     }
 
-    // A replay is a scrub that drives itself, the chart drawing in behind it.
+    // The chart draws in behind the replay's scrub.
     replay() {
       this.stopReplay();
       const { pts } = this.series();
       if (!pts.length || reducedMotion.matches) { this.scrub = -1; this.render(); return; }
-      const first = pts[0].x;
-      const last = pts[pts.length - 1].x;
-      const t0 = performance.now();
-      const tick = (t) => {
-        const f = Math.min(1, (t - t0) / 2200);
-        const x = first + f * (last - first);
-        let i = 0;
-        while (i + 1 < pts.length && pts[i + 1].x <= x) i++;
-        this.scrub = f < 1 ? i : -1;
-        this.reveal = f < 1 ? x + 0.0001 : 1;
+      this.stopSweep = sweep(pts, this.chart, (i, reveal) => {
+        if (i < 0) this.stopSweep = null;
+        this.scrub = i;
+        this.reveal = reveal;
         this.render();
-        this.replayFrame = f < 1 ? requestAnimationFrame(tick) : null;
-      };
-      this.replayFrame = requestAnimationFrame(tick);
+      });
     }
     stopReplay() {
-      if (this.replayFrame !== null) cancelAnimationFrame(this.replayFrame);
-      this.replayFrame = null;
+      if (this.stopSweep) this.stopSweep();
+      this.stopSweep = null;
       this.reveal = 1;
     }
 
     toggleSheet(open) {
       if (!this.el.sheet) return;
       this.el.sheet.hidden = !(open ?? this.el.sheet.hidden);
+      this.el.help.dataset.tip = this.el.sheet.hidden ? "Show all keys" : "Hide the keys";
     }
 
     key(e) {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.metaKey || e.altKey) return;
       const k = e.key;
+      if (e.ctrlKey) {
+        // Ctrl+Z undoes a removal here; every other Ctrl key stays the browser's.
+        if (this.full && k.toLowerCase() === "z" && this.undoable) { e.preventDefault(); this.undo(); }
+        return;
+      }
       const onButton = e.target.tagName === "BUTTON";
       const { pts } = this.series();
       let handled = true;
@@ -441,23 +633,21 @@
         if (this.el.sheet && !this.el.sheet.hidden) this.toggleSheet(false);
         else if (this.scrub >= 0) this.endScrub();
         else handled = false;
-      } else if (["ArrowLeft", "h", "ArrowRight", "l"].includes(k) && pts.length) {
-        const d = k === "ArrowLeft" || k === "h" ? -1 : 1;
-        this.stopReplay();
+      } else if ((k === "ArrowLeft" || k === "ArrowRight") && pts.length) {
         const from = this.scrub >= 0 ? this.scrub : pts.length - 1;
-        this.scrub = Math.max(0, Math.min(pts.length - 1, from + d));
-        this.render();
+        this.scrubTo(Math.max(0, Math.min(pts.length - 1, from + (k === "ArrowLeft" ? -1 : 1))), true);
       } else if (k === "p") this.replay();
       else if (k === "c") this.cycleChange();
       else if (!this.full) handled = false;
       else if (k === "[" || k === "]") this.stepRange(k === "[" ? -1 : 1);
-      else if (["ArrowUp", "k", "ArrowDown", "j"].includes(k)) {
-        this.sel = (this.sel + (k === "ArrowUp" || k === "k" ? -1 : 1) + this.symbols.length) % this.symbols.length;
+      else if (k === "a") this.putBack();
+      else if (k === "Delete" || k === "Backspace") this.remove(this.sel);
+      else if (k === "ArrowUp" || k === "ArrowDown") {
+        this.sel = (this.sel + (k === "ArrowUp" ? -1 : 1) + this.symbols.length) % this.symbols.length;
         // Keep focus on the selected row, so Enter on it shows that row.
-        if (e.target.classList.contains("row")) this.el.rows.children[this.sel].focus();
+        if (e.target.classList.contains("row")) this.el.rows.children[this.sel].firstElementChild.focus();
         this.renderRows();
       } else if ((k === "Enter" || k === " ") && !onButton) this.setSymbol(this.sel);
-      else if (/^[1-4]$/.test(k)) { this.sel = Number(k) - 1; this.setSymbol(this.sel); }
       else handled = false;
       if (handled) e.preventDefault();
     }
@@ -506,8 +696,17 @@
     const total = track.offsetHeight - sticky.offsetHeight;
     const stickTop = parseFloat(getComputedStyle(sticky).top) || 0;
     const p = Math.max(0, Math.min(1, (stickTop - r.top) / Math.max(1, total)));
-    dayPop.setClock(clockFor(p));
+    const before = dayPop.clock;
+    const now = clockFor(p);
+    dayPop.setClock(now);
+    // The bell, as the clock scrolls on past the open or the close. A jump
+    // past the day rings nothing, nor does the scroll a link makes, as
+    // "skip it" or Install, which passes through it in steps.
+    const passed = [Market.OPEN, Market.CLOSE].some((bell) => before < bell && now >= bell);
+    if (passed && now - before < 180 && performance.now() > linkScroll) Sound.play(Look.retro, "bell");
   }
+  let linkScroll = 0;
+  document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#"]')) linkScroll = performance.now() + 1500; });
   function setDayMode() {
     daySection.classList.toggle("still", reducedMotion.matches);
     if (reducedMotion.matches) dayPop.setClock(WHOLE_DAY);
@@ -634,7 +833,98 @@
       unlight = setTimeout(() => row.classList.remove("lit"), 1600);
     }
     if (key === "s") Look.toggle();
+    if (key === "m") Sound.toggle(Look.retro);
   });
+
+  // ---- The speakers: the bar's and each popup's say whether sound is on,
+  // and turn it on or off.
+
+  function paintSpeakers() {
+    document.querySelectorAll("[data-sound-toggle]").forEach((b) => {
+      b.querySelector(".speaker-icon").innerHTML = Cells.iconSVG(Sound.on ? "soundOn" : "soundOff", 3, "currentColor");
+      b.setAttribute("aria-pressed", String(Sound.on));
+      b.setAttribute("aria-label", Sound.on ? "Turn sounds off" : "Turn sounds on");
+      b.dataset.tip = Sound.on ? "Turn sounds off" : "Turn sounds on";
+    });
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-sound-toggle]")) Sound.toggle(Look.retro); });
+  Sound.onChange(paintSpeakers);
+
+  // ---- Sound test: a made-up day to run the pointer along, and every
+  // sound on a pad of its own, in the page's look's voice.
+
+  const strip = document.querySelector("#sound .chimes");
+  const stripDay = Market.SYMBOLS[0];
+  const stripPts = stripDay.prints;
+  const soundState = document.querySelector(".sound-state");
+  let stripScrub = -1, stripReveal = 1, stripChart = null, stripChimed = -1, stopStrip = null;
+
+  function drawStrip() {
+    const { ctx, w, h } = Cells.fit(strip);
+    const o = { scrub: stripScrub, reveal: stripReveal, ticks: Market.BELLS };
+    stripChart = Look.retro
+      ? Cells.drawRetro(ctx, w, h, stripPts, stripDay.prev, { ...o, pixel: 6, gap: 1, ghost: 0.035 })
+      : Cells.drawSmooth(ctx, w, h, stripPts, stripDay.prev, o);
+    const p = stripPts[stripScrub >= 0 ? stripScrub : stripPts.length - 1];
+    strip.setAttribute("aria-valuenow", String(Math.round(p.x * 100)));
+    strip.setAttribute("aria-valuetext", `${Market.hhmm(p.m)}, ${money(p.v)}`);
+  }
+  function stripTo(i, again) {
+    if (stopStrip) stopStrip();
+    stopStrip = null;
+    stripReveal = 1;
+    stripScrub = i;
+    drawStrip();
+    const bar = i < 0 ? -1 : Sound.barAt(stripChart, stripPts[i].x);
+    if (bar !== stripChimed || again) Sound.chime(Look.retro, bar);
+    stripChimed = bar;
+  }
+  function stripReplay() {
+    stripTo(-1);
+    if (reducedMotion.matches) return;
+    stopStrip = sweep(stripPts, stripChart, (i, reveal) => {
+      if (i < 0) stopStrip = null;
+      stripScrub = i;
+      stripReveal = reveal;
+      drawStrip();
+    });
+  }
+  const stripAt = (e) => {
+    const r = strip.getBoundingClientRect();
+    stripTo(nearest(stripPts, Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))), false);
+  };
+  strip.addEventListener("pointermove", stripAt);
+  strip.addEventListener("pointerdown", stripAt);
+  strip.addEventListener("pointerleave", () => { if (!stopStrip) stripTo(-1); });
+  strip.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const from = stripScrub >= 0 ? stripScrub : stripPts.length - 1;
+    stripTo(Math.max(0, Math.min(stripPts.length - 1, from + (e.key === "ArrowLeft" ? -1 : 1))), true);
+  });
+  document.querySelector("#sound .pads").addEventListener("click", (e) => {
+    const pad = e.target.closest("[data-sound]");
+    if (!pad) return;
+    if (pad.dataset.sound === "replay") stripReplay();
+    else Sound.play(Look.retro, pad.dataset.sound);
+  });
+
+  function paintSoundState() {
+    if (!Sound.on) soundState.textContent = "Sound is off. Press m, or click the speaker, to turn it on.";
+    else if (!Sound.heard) soundState.textContent = "Sound is on, and starts once you click or press a key on this page.";
+    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s for the other look's, and m to turn sound off.`;
+  }
+  Sound.onChange(paintSoundState);
+  Look.on(() => { stripTo(-1); paintSoundState(); });
+
+  // ---- The screenshot: Stonks' own picture, in the page's look.
+
+  const shareImg = document.querySelector(".share-shot img");
+  const showShare = () => {
+    shareImg.src = shareImg.dataset.lookSrc.replace("{look}", Look.value);
+    shareImg.alt = shareImg.alt.replace(/in (retro|smooth):/, `in ${Look.value}:`);
+  };
+  Look.on(showShare);
 
   // ---- Page cells: headings, sprites, the hero's ground
 
@@ -704,12 +994,16 @@
     paintBlocks();
     hero.render();
     dayPop.render();
+    drawStrip();
     paintScatter();
     paintSkyline();
   }
   setDayMode();
   paintAll();
   showTheme();
+  showShare();
+  paintSpeakers();
+  paintSoundState();
   if (document.fonts) document.fonts.ready.then(paintAll);
   let resizeTimer = 0;
   addEventListener("resize", () => {

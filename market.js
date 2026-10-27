@@ -92,20 +92,26 @@ window.Market = (() => {
     return prints;
   }
 
+  // `vol` is a whole day's volume, `shares` the shares out (for the market
+  // cap), `eps` the last year's earnings per share (for the P/E).
   const SYMBOLS = [
-    { sym: "ARCADE", name: "Arcade Cabinets Inc", prev: 214.3, seed: 7, anchors: [
+    { sym: "ARCADE", name: "Arcade Cabinets Inc", prev: 214.3, seed: 7, vol: 18.6e6, shares: 412e6, eps: 7.86, anchors: [
       [240, 0.1], [330, 0.35], [450, 0.2], [565, 0.45], [600, 0.85], [660, 0.35], [700, -0.45], [750, -1.05],
       [790, -0.4], [840, 1.25], [885, 0.61], [905, 0.2], [930, -0.3], [955, -0.42], [1000, -0.55], [1100, -0.4], [1195, -0.5]] },
-    { sym: "PIXELS", name: "Pixel Foundry Co", prev: 88.42, seed: 11, anchors: [
+    { sym: "PIXELS", name: "Pixel Foundry Co", prev: 88.42, seed: 11, vol: 9.37e6, shares: 1.27e9, eps: 2.41, anchors: [
       [240, -0.1], [565, 0.3], [600, 0.45], [700, -0.3], [800, -0.9], [885, -1.42], [955, -1.6], [1195, -1.5]] },
-    { sym: "JOYPAD", name: "Joypad Industries", prev: 41.07, seed: 23, anchors: [
+    { sym: "JOYPAD", name: "Joypad Industries", prev: 41.07, seed: 23, vol: 4.13e6, shares: 236e6, eps: 1.19, anchors: [
       [240, 0.2], [565, 0.6], [600, 0.3], [700, 1.1], [800, 0.75], [885, 2.08], [955, 2.3], [1195, 2.4]] },
-    { sym: "HISCORE", name: "High Score Holdings", prev: 1286.5, seed: 31, anchors: [
+    { sym: "HISCORE", name: "High Score Holdings", prev: 1286.5, seed: 31, vol: 0.83e6, shares: 51.6e6, eps: 38.4, anchors: [
       [240, 0], [565, -0.05], [600, -0.1], [700, 0.35], [800, -0.2], [860, 0.12], [885, -0.27], [955, -0.1], [1195, -0.15]] },
   ];
   for (const s of SYMBOLS) s.prints = makeDay(s.prev, s.anchors, s.seed);
 
   const money = (n) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function big(n) {
+    for (const [unit, size] of [["T", 1e12], ["B", 1e9], ["M", 1e6], ["K", 1e3]]) if (n >= size) return (n / size).toPrecision(3) + unit;
+    return String(Math.round(n));
+  }
 
   // What a listing shows at clock `now`: the prints so far, the headline
   // (the regular session's price; before the open, yesterday's close), its
@@ -126,6 +132,7 @@ window.Market = (() => {
       pct: ((price - s.prev) / s.prev) * 100,
       open: regular.length ? regular[0].v : null,
       low: regular.length ? Math.min(...regular.map((p) => p.v)) : null,
+      volume: s.vol * (regular.length / s.prints.filter((p) => !p.ext).length),
       high: regular.length ? Math.max(...regular.map((p) => p.v)) : null,
       caption: trading(phase) ? "" : "AT CLOSE",
       asleep: phase === "closed",
@@ -151,5 +158,5 @@ window.Market = (() => {
     return v;
   }
 
-  return { PRE, OPEN, CLOSE, POST_END, BELLS, SYMBOLS, rng, round2, hhmm, money, quoteAt, readingAt, priceAt, phaseAt };
+  return { PRE, OPEN, CLOSE, POST_END, BELLS, SYMBOLS, rng, round2, hhmm, money, big, quoteAt, readingAt, priceAt, phaseAt };
 })();
