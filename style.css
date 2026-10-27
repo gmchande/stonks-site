@@ -98,7 +98,7 @@ button { font: inherit; color: inherit; }
 .speaker:hover { color: var(--fg); }
 .speaker-icon { display: block; width: 17px; height: 11px; }
 .speaker-icon svg { display: block; }
-.speaker[aria-pressed="false"] .speaker-word { text-decoration: line-through; text-decoration-color: var(--faint); }
+.speaker[data-state="off"] .speaker-word { text-decoration: line-through; text-decoration-color: var(--faint); }
 
 /* Hero */
 .hero { position: relative; overflow: hidden; padding: 56px 24px 0; }
@@ -170,6 +170,17 @@ button { font: inherit; color: inherit; }
   font-size: 13px;
   user-select: none;
 }
+/* The invitation to hear the hero's replay, in its chart's empty bottom
+   corner: out of the flow, just under the chart, raised into it, so
+   nothing moves as it comes and goes. */
+.hear {
+  position: absolute; right: 30px; z-index: 2; margin-top: -36px;
+  display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px;
+  border: 0; background: var(--fg); color: var(--bg); cursor: pointer;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+}
+.hear[hidden] { display: none; }
+.hear-short { display: none; }
 .demo-wrap figcaption { margin-top: 22px; font-size: 13px; color: var(--muted); line-height: 1.6; }
 /* The demos' room, kept until the script builds them (see .wordmark). */
 .js #demo:empty { min-height: 840px; }
@@ -459,6 +470,9 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .topbar nav { gap: 12px; }
   .speaker { padding: 0; }
   .speaker-word { display: none; }
+  .hear { right: 24px; }
+  .hear-long { display: none; }
+  .hear-short { display: inline; }
   .hero { padding: 36px 16px 0; }
   .eyebrow { margin-bottom: 20px; font-size: 12px; }
   .lead { font-size: 21px; }

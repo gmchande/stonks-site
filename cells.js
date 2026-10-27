@@ -161,6 +161,8 @@ window.Cells = (() => {
   const ICONS = {
     soundOn: { columns: 6, rows: 4, path: SOUND_CONE.concat([["A", 7, 5.5, 3.8, -50, 50], ["stroke"], ["A", 7, 5.5, 7.4, -50, 50], ["stroke"]]) },
     soundOff: { columns: 6, rows: 4, path: SOUND_CONE.concat([["M", 10.5, 3.5], ["L", 14.5, 7.5], ["stroke"], ["M", 14.5, 3.5], ["L", 10.5, 7.5], ["stroke"]]) },
+    // The page's own: on, and waiting for the reader's first click or key.
+    soundWaiting: { columns: 6, rows: 4, path: SOUND_CONE },
     camera: { columns: 6, rows: 4, path: CAMERA_BODY },
     cameraLit: { columns: 6, rows: 4, path: CAMERA_BODY.concat([["dot", 8.5, 6.6, 1.6]]) },
     pct: { columns: 4, rows: 4, path: [["dot", 3, 3, 2.1], ["dot", 9.5, 8.5, 2.1], ["M", 10.5, 0.8], ["L", 2, 10.7], ["stroke"]] },

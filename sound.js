@@ -1,8 +1,10 @@
 // Stonks' sounds on the page, as the plugin plays them: the fixed sounds
 // from its own WAVs (sounds/), and the chimes and the replay made from the
 // chart on screen, ported from its ChartSound.js. A browser plays nothing
-// until the reader clicks or presses a key, so the first one starts them;
-// the speaker, or m, turns them off, and the page remembers.
+// until the reader clicks, taps, or presses a key, never on a scroll, so
+// the first one starts them; until then the speaker says they're waiting,
+// and pressing it starts them. Then the speaker, or m, turns them off, and
+// the page remembers.
 window.Sound = (() => {
   "use strict";
 
@@ -293,9 +295,15 @@ window.Sound = (() => {
     return src;
   }
 
+  // Whether sound was on and still waiting as the reader's latest press
+  // began: a press on the speaker then starts sound rather than turning it
+  // off, though the audio may have started by the time its click lands.
+  let pressWaited = false;
+
   // The first click or key starts the page's audio; before it, nothing
   // can sound. Then the fixed sounds load, so the first plays at once.
-  function unlock() {
+  function unlock(e) {
+    if (e && (e.type === "pointerdown" || e.type === "keydown")) pressWaited = on && !ready();
     if (!ctx) {
       const Context = window.AudioContext || window.webkitAudioContext;
       if (!Context) return;
@@ -348,14 +356,49 @@ window.Sound = (() => {
     if (!waitTimer) waitTimer = setTimeout(() => { waitTimer = 0; if (waiting && ready()) strike(waiting.retro, waiting.bar); }, Math.ceil(wait));
   }
 
+  // A replay's picture and sound start together: `go` starts both. Before
+  // the reader's first press nothing can sound, so a replay starts at once,
+  // silent; after one, while the audio is still starting, it waits until
+  // the audio reaches the speakers, 1.5 s at most, as Stonks waits for its
+  // output to wake: by the output's timestamp, or where a browser gives
+  // none, once the audio has run a quarter second. Returns what drops the
+  // wait.
+  const pressed = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
+  const flowing = () => ctx.state === "running"
+    && ((ctx.getOutputTimestamp && ctx.getOutputTimestamp().contextTime > 0) || ctx.currentTime >= 0.25);
+  function whenHeard(go) {
+    if (!on || !ctx || !pressed() || flowing()) { go(); return () => {}; }
+    const since = performance.now();
+    let frame = requestAnimationFrame(function wait(t) {
+      frame = 0;
+      if (!on || flowing() || t - since >= 1500) go();
+      else frame = requestAnimationFrame(wait);
+    });
+    return () => cancelAnimationFrame(frame);
+  }
+
   // A replay's sound, made from the chart as it starts: `chart` is what
   // the chart drew (its retro grid or smooth points), and the replay runs
-  // from `from` to `to` along it over `seconds`.
+  // from `from` to `to` along it over `seconds`. Returns its clock, the
+  // seconds of it the speakers have played, or null while nothing sounds:
+  // a browser plays what it makes a little later, 0.3 s in Chrome over
+  // PipeWire, so a picture kept to the clock keeps to what's heard.
   function replay(chart, from, to, seconds) {
     stopReplay();
-    if (!ready() || !chart) return;
+    if (!ready() || !chart) return null;
     const sound = chart.retro ? retroReplay(chart.grid, from, to, seconds) : smoothReplay(chart.geometry, from, to, seconds);
+    const at = ctx.currentTime;
     replaySource = start(bufferOf(sound), true);
+    return () => playing() - at;
+  }
+
+  // The context's time the speakers are playing now, by the output's own
+  // timestamp where the browser gives one; Chrome's first can come without
+  // its moment on the page's clock, `performanceTime` 0.
+  function playing() {
+    const o = ctx.getOutputTimestamp ? ctx.getOutputTimestamp() : null;
+    if (!o || !o.contextTime || !o.performanceTime) return ctx.currentTime - (ctx.baseLatency || 0) - (ctx.outputLatency || 0);
+    return o.contextTime + (performance.now() - o.performanceTime) / 1000;
   }
   function stopReplay() {
     if (replaySource && solo === replaySource) try { replaySource.stop(); } catch { /* ended */ }
@@ -380,10 +423,18 @@ window.Sound = (() => {
     if (on) { unlock(); play(retro, "add"); }
   }
 
+  // The speaker pressed: while sound waits for the reader's first press,
+  // it starts sound, as its label says; otherwise it turns sound on or off.
+  function press(retro) {
+    const waited = pressWaited || (on && !ctx);
+    pressWaited = false;
+    set(waited || !on, retro);
+  }
+
   return {
     get on() { return on; },
     get heard() { return ready(); },
-    set, toggle: (retro) => set(!on, retro), onChange: (fn) => listeners.push(fn),
-    play, chime, barAt, replay, stopReplay,
+    set, toggle: (retro) => set(!on, retro), press, onChange: (fn) => listeners.push(fn),
+    play, chime, barAt, whenHeard, replay, stopReplay,
   };
 })();

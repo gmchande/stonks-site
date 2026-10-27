@@ -44,23 +44,31 @@
     return f > pts[pts.length - 1].x ? pts.length - 1 : best;
   }
 
-  // `step(scrub, reveal)` draws each frame, then (-1, 1) at the end. Returns
-  // the replay's stop, which stops its sound too.
+  // `step(scrub, reveal)` draws each frame, then (-1, 1) at the end. The
+  // picture and the sound start together, once the sound can be heard
+  // (`Sound.whenHeard`), and the picture keeps to what the speakers have
+  // played (the replay's clock), never more than 1 s behind the page's own.
+  // Returns the replay's stop, which stops its sound too, or drops its wait.
   function sweep(pts, chart, step) {
     const from = pts[0].x, to = pts[pts.length - 1].x;
-    Sound.replay(chart, from, to, REPLAY_MS / 1000);
-    const t0 = performance.now();
     let frame = 0;
-    const tick = (t) => {
-      const f = Math.min(1, (t - t0) / REPLAY_MS);
-      const x = from + inOutSine(f) * (to - from);
-      let i = 0;
-      while (i + 1 < pts.length && pts[i + 1].x <= x) i++;
-      frame = f < 1 ? requestAnimationFrame(tick) : 0;
-      step(f < 1 ? i : -1, f < 1 ? x + 0.0001 : 1);
-    };
-    frame = requestAnimationFrame(tick);
+    const drop = Sound.whenHeard(() => {
+      const heard = Sound.replay(chart, from, to, REPLAY_MS / 1000);
+      const t0 = performance.now();
+      let f = 0;
+      const tick = (t) => {
+        const ms = heard ? Math.max(heard() * 1000, t - t0 - 1000) : t - t0;
+        f = Math.max(f, Math.min(1, ms / REPLAY_MS));
+        const x = from + inOutSine(f) * (to - from);
+        let i = 0;
+        while (i + 1 < pts.length && pts[i + 1].x <= x) i++;
+        frame = f < 1 ? requestAnimationFrame(tick) : 0;
+        step(f < 1 ? i : -1, f < 1 ? x + 0.0001 : 1);
+      };
+      frame = requestAnimationFrame(tick);
+    });
     return () => {
+      drop();
       if (!frame) return;
       cancelAnimationFrame(frame);
       frame = 0;
@@ -632,6 +640,16 @@
       this.reveal = 1;
     }
 
+    // The newest print drawn strikes its bar when the bar changes, as a
+    // scrub's does, so a clock moving on plays the chart as it draws;
+    // `quiet` keeps the bar without striking it.
+    chimeDrawn(quiet) {
+      const { pts } = this.series();
+      const bar = pts.length ? Sound.barAt(this.chart, pts[pts.length - 1].x) : -1;
+      if (bar !== this.chimed && !quiet) Sound.chime(Look.retro, bar);
+      this.chimed = bar;
+    }
+
     toggleSheet(open) {
       if (!this.el.sheet) return;
       this.el.sheet.hidden = !(open ?? this.el.sheet.hidden);
@@ -719,12 +737,16 @@
     const p = Math.max(0, Math.min(1, (stickTop - r.top) / Math.max(1, total)));
     const before = dayPop.clock;
     const now = clockFor(p);
+    if (now === before) return;
     dayPop.setClock(now);
-    // The bell, as the clock scrolls on past the open or the close. A jump
-    // past the day rings nothing, nor does the scroll a link makes, as
+    // The scroll plays the chart as it draws (`chimeDrawn`), and the bell
+    // rings as the clock scrolls on past the open or the close. A jump
+    // across the day plays nothing, nor does the scroll a link makes, as
     // "skip it" or Install, which passes through it in steps.
+    const heard = Math.abs(now - before) < 180 && performance.now() > linkScroll;
+    dayPop.chimeDrawn(!heard);
     const passed = [Market.OPEN, Market.CLOSE].some((bell) => before < bell && now >= bell);
-    if (passed && now - before < 180 && performance.now() > linkScroll) Sound.play(Look.retro, "bell");
+    if (passed && heard) Sound.play(Look.retro, "bell");
   }
   let linkScroll = 0;
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#"]')) linkScroll = performance.now() + 1500; });
@@ -858,18 +880,43 @@
   });
 
   // ---- The speakers: the bar's and each popup's say whether sound is on,
-  // and turn it on or off.
+  // off, or on and waiting for the reader's first click or key, which the
+  // browser needs before anything sounds; and a press starts it, or turns
+  // it on or off.
 
+  const SPEAKER = {
+    on: ["soundOn", "Turn sounds off"],
+    off: ["soundOff", "Turn sounds on"],
+    waiting: ["soundWaiting", "Start sounds"],
+  };
   function paintSpeakers() {
+    const state = !Sound.on ? "off" : Sound.heard ? "on" : "waiting";
+    const [icon, label] = SPEAKER[state];
     document.querySelectorAll("[data-sound-toggle]").forEach((b) => {
-      b.querySelector(".speaker-icon").innerHTML = Cells.iconSVG(Sound.on ? "soundOn" : "soundOff", 3, "currentColor");
-      b.setAttribute("aria-pressed", String(Sound.on));
-      b.setAttribute("aria-label", Sound.on ? "Turn sounds off" : "Turn sounds on");
-      b.dataset.tip = Sound.on ? "Turn sounds off" : "Turn sounds on";
+      b.querySelector(".speaker-icon").innerHTML = Cells.iconSVG(icon, 3, "currentColor");
+      b.dataset.state = state;
+      b.setAttribute("aria-pressed", String(state === "on"));
+      b.setAttribute("aria-label", label);
+      b.dataset.tip = label;
     });
   }
-  document.addEventListener("click", (e) => { if (e.target.closest("[data-sound-toggle]")) Sound.toggle(Look.retro); });
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-sound-toggle]")) Sound.press(Look.retro); });
   Sound.onChange(paintSpeakers);
+
+  // The hero's invitation: while sound waits for the reader's first click
+  // or key, a button over the empty corner of the demo's day, after its
+  // close, below its baseline, replays it with its sound. It goes once
+  // sound has started or is off, and with it the only chart it shows on.
+  const hear = document.createElement("button");
+  hear.type = "button";
+  hear.className = "hear";
+  hear.hidden = true;
+  hear.innerHTML = `<span class="speaker-icon" aria-hidden="true">${Cells.iconSVG("soundOn", 3, "currentColor")}</span>Hear <span class="hear-long">the replay</span><span class="hear-short">it</span>`;
+  hear.addEventListener("click", () => hero.replay());
+  hero.el.chart.after(hear);
+  const paintHear = () => { hear.hidden = !Sound.on || Sound.heard || reducedMotion.matches; };
+  Sound.onChange(paintHear);
+  reducedMotion.addEventListener("change", paintHear);
 
   // ---- Sound test: a made-up day to run the pointer along, and every
   // sound on a pad of its own, in the page's look's voice.
@@ -1024,6 +1071,7 @@
   showTheme();
   showShare();
   paintSpeakers();
+  paintHear();
   paintSoundState();
   if (document.fonts) document.fonts.ready.then(paintAll);
   let resizeTimer = 0;
@@ -1033,10 +1081,12 @@
   });
 
   // Attract mode: the first time the hero's popup comes into view, it
-  // replays its day.
+  // replays its day, unless the reader is already replaying or scrubbing it.
   if (!reducedMotion.matches && "IntersectionObserver" in window) {
     const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); setTimeout(() => hero.replay(), 400); }
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      setTimeout(() => { if (!hero.stopSweep && hero.scrub < 0) hero.replay(); }, 400);
     }, { threshold: 0.6 });
     io.observe(hero.el.chart);
   }
