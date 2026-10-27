@@ -915,13 +915,22 @@
   hero.el.chart.after(hear);
   // A press on it starts the audio, which would hide it before the press
   // ends and its click lands: it stays until its click, or a moment after
-  // a press that ends without one, as one dragged off it.
-  let held = false;
-  const letGo = () => { held = false; paintHear(); };
-  for (const type of ["pointerdown", "keydown"]) hear.addEventListener(type, () => { held = true; });
+  // a press that ends without one, as one dragged off it; a press again
+  // within that moment holds it anew.
+  let held = false, release = 0;
+  const letGo = () => { clearTimeout(release); held = false; paintHear(); };
+  for (const type of ["pointerdown", "keydown"]) hear.addEventListener(type, () => { clearTimeout(release); held = true; });
   hear.addEventListener("click", () => { hero.replay(); letGo(); });
-  for (const type of ["pointerup", "pointercancel", "keyup"]) addEventListener(type, () => { if (held) setTimeout(letGo, 300); });
-  const paintHear = () => { hear.hidden = !Sound.on || (Sound.heard && !held) || reducedMotion.matches; };
+  for (const type of ["pointerup", "pointercancel", "keyup"]) {
+    addEventListener(type, () => { if (held) { clearTimeout(release); release = setTimeout(letGo, 300); } });
+  }
+  // Going while focused, it hands focus to the chart it replays, so the
+  // demo's keys go on working.
+  const paintHear = () => {
+    const gone = !Sound.on || (Sound.heard && !held) || reducedMotion.matches;
+    if (gone && document.activeElement === hear) hero.el.chart.focus({ preventScroll: true });
+    hear.hidden = gone;
+  };
   Sound.onChange(paintHear);
   reducedMotion.addEventListener("change", paintHear);
 
