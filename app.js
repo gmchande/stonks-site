@@ -745,8 +745,21 @@
     // "skip it" or Install, which passes through it in steps.
     const heard = Math.abs(now - before) < 180 && performance.now() > linkScroll;
     dayPop.chimeDrawn(!heard);
-    const passed = [Market.OPEN, Market.CLOSE].some((bell) => before < bell && now >= bell);
-    if (passed && heard) Sound.play(Look.retro, "bell");
+    const passed = [Market.OPEN, Market.CLOSE].find((bell) => before < bell && now >= bell);
+    if (passed && heard) Sound.play(Look.retro, "bell").then((rang) => { if (rang) nameBell(passed === Market.OPEN ? 1 : 2); });
+  }
+
+  // The line under the clock names the bell as it's heard, for 2 s, about
+  // the smooth bell's ring, then goes back to the day's place. Every
+  // wording sits in one cell, so the line keeps its longest one's width and
+  // nothing moves.
+  const place = daySection.querySelector(".clock-place");
+  place.innerHTML = [place.textContent, "OPENING BELL", "CLOSING BELL"].map((t, i) => `<span${i ? "" : ' class="shown"'}>${t}</span>`).join("");
+  let bellNamed = 0;
+  function nameBell(i) {
+    [...place.children].forEach((s, k) => s.classList.toggle("shown", k === i));
+    clearTimeout(bellNamed);
+    if (i) bellNamed = setTimeout(() => nameBell(0), 2000);
   }
   let linkScroll = 0;
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#"]')) linkScroll = performance.now() + 1500; });

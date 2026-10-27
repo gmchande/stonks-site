@@ -319,10 +319,17 @@ window.Sound = (() => {
 
   // A fixed sound, in the look's voice: add, remove, undo, shutter, bell.
   // The click that turns sound on is still starting the audio as it asks.
+  // Resolves true once the speakers play it (`playing`), so what names it
+  // shows as it's heard; false if it doesn't sound.
   function play(retro, name) {
-    if (!on || !ctx) return;
-    Promise.all([load(voice(retro), name), ctx.state === "running" || ctx.resume()])
-      .then(([b]) => { if (ready()) start(b, true); }, () => {});
+    if (!on || !ctx) return Promise.resolve(false);
+    return Promise.all([load(voice(retro), name), ctx.state === "running" || ctx.resume()])
+      .then(([b]) => {
+        if (!ready()) return false;
+        const at = ctx.currentTime;
+        start(b, true);
+        return new Promise((heard) => setTimeout(() => heard(ready()), Math.max(0, (at - playing()) * 1000)));
+      }, () => false);
   }
 
   // A chime, bar `bar` (0..10) struck: at most one every 45 ms, 22 a

@@ -373,6 +373,11 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 .day-clock { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 .clock-digits { height: 60px; }
 .clock-place { font-size: 13px; letter-spacing: 0.16em; color: var(--muted); }
+/* The day's place, or the bell as it rings, in one cell (see nameBell). */
+.js .clock-place { display: grid; white-space: nowrap; }
+.clock-place > span { grid-area: 1 / 1; }
+.clock-place > span:not(:first-child) { color: var(--fg); }
+.clock-place > span:not(.shown) { visibility: hidden; }
 .day-pop { position: relative; width: 470px; max-width: 100%; }
 .popup.compact .chart { height: 180px; }
 
@@ -460,6 +465,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .theme-shot { max-width: 470px; }
   .day-sticky { flex-direction: column; gap: 20px; }
   .day-clock { align-items: center; }
+  .clock-place { text-align: center; }
   .cart { grid-template-columns: 1fr; }
   .not-label { border-left: 0; border-top: 2px dashed var(--line); }
 }
@@ -537,6 +543,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 @media (max-height: 600px) and (orientation: landscape) {
   .day-sticky { flex-direction: row; gap: 24px; padding: 8px 16px; }
   .day-clock { align-items: flex-start; }
+  .clock-place { text-align: start; }
   .popup.compact { padding: 10px 14px 6px; }
   .popup.compact .listing { margin: 4px 0; }
   .popup.compact .strip { margin: 2px 0 6px; }
