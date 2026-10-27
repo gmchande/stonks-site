@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Renders tools/preview-card.html to OUT (3200 x 1600), Stonks' preview.png:
 # the README's first picture and the plugin marketplace's. GRABS holds
-# Stonks' own pictures the card shows, from its test/qml/readme.sh --grabs:
-# strip-spy.png (scale 6) and retro-spy.png (scale 3). Needs Chromium and
+# Stonks' own pictures the card shows, from its test/qml/readme.sh
+# --marketplace: strip.png (scale 6) and popup.png (scale 3). Needs Chromium and
 # ImageMagick.
 #
 #   tools/render-preview.sh GRABS OUT
@@ -10,7 +10,7 @@ set -euo pipefail
 [ $# -eq 2 ] || { echo "usage: tools/render-preview.sh GRABS OUT" >&2; exit 2; }
 grabs=$(cd "$1" && pwd)
 out=$(realpath -m "$2")
-for f in strip-spy.png retro-spy.png; do [ -s "$grabs/$f" ] || { echo "no $grabs/$f" >&2; exit 1; }; done
+for f in strip.png popup.png; do [ -s "$grabs/$f" ] || { echo "no $grabs/$f" >&2; exit 1; }; done
 cd "$(dirname "$0")/.."
 # The page is served as /site/tools/preview-card.html beside /grabs/, so
 # neither folder is written to.
