@@ -373,8 +373,9 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 .day-clock { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 .clock-digits { height: 60px; }
 .clock-place { font-size: 13px; letter-spacing: 0.16em; color: var(--muted); }
-/* The day's place, or the bell as it rings, in one cell (see nameBell). */
-.js .clock-place { display: grid; white-space: nowrap; }
+/* The day's place, or the bell as it rings, in one cell (see nameBell):
+   the wordings wrap alike, so the line keeps its size as they change. */
+.js .clock-place { display: grid; }
 .clock-place > span { grid-area: 1 / 1; }
 .clock-place > span:not(:first-child) { color: var(--fg); }
 .clock-place > span:not(.shown) { visibility: hidden; }

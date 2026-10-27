@@ -319,16 +319,24 @@ window.Sound = (() => {
 
   // A fixed sound, in the look's voice: add, remove, undo, shutter, bell.
   // The click that turns sound on is still starting the audio as it asks.
-  // Resolves true once the speakers play it (`playing`), so what names it
-  // shows as it's heard; false if it doesn't sound.
+  // Resolves true once the speakers play it, by the output's clock
+  // (`playing`), so what names it shows as it's heard; false if it doesn't
+  // sound: sound turned off, another fixed sound taking its place, or the
+  // output not reaching it within 1.5 s.
   function play(retro, name) {
     if (!on || !ctx) return Promise.resolve(false);
     return Promise.all([load(voice(retro), name), ctx.state === "running" || ctx.resume()])
       .then(([b]) => {
         if (!ready()) return false;
-        const at = ctx.currentTime;
-        start(b, true);
-        return new Promise((heard) => setTimeout(() => heard(ready()), Math.max(0, (at - playing()) * 1000)));
+        const at = ctx.currentTime, src = start(b, true), since = performance.now();
+        return new Promise((heard) => {
+          const check = () => {
+            if (!ready() || solo !== src || performance.now() - since > 1500) heard(false);
+            else if (playing() >= at) heard(true);
+            else setTimeout(check, 15);
+          };
+          check();
+        });
       }, () => false);
   }
 
