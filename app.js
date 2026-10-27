@@ -912,9 +912,16 @@
   hear.className = "hear";
   hear.hidden = true;
   hear.innerHTML = `<span class="speaker-icon" aria-hidden="true">${Cells.iconSVG("soundOn", 3, "currentColor")}</span>Hear <span class="hear-long">the replay</span><span class="hear-short">it</span>`;
-  hear.addEventListener("click", () => hero.replay());
   hero.el.chart.after(hear);
-  const paintHear = () => { hear.hidden = !Sound.on || Sound.heard || reducedMotion.matches; };
+  // A press on it starts the audio, which would hide it before the press
+  // ends and its click lands: it stays until its click, or a moment after
+  // a press that ends without one, as one dragged off it.
+  let held = false;
+  const letGo = () => { held = false; paintHear(); };
+  for (const type of ["pointerdown", "keydown"]) hear.addEventListener(type, () => { held = true; });
+  hear.addEventListener("click", () => { hero.replay(); letGo(); });
+  for (const type of ["pointerup", "pointercancel", "keyup"]) addEventListener(type, () => { if (held) setTimeout(letGo, 300); });
+  const paintHear = () => { hear.hidden = !Sound.on || (Sound.heard && !held) || reducedMotion.matches; };
   Sound.onChange(paintHear);
   reducedMotion.addEventListener("change", paintHear);
 
