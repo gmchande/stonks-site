@@ -672,9 +672,10 @@
         if (this.el.sheet && !this.el.sheet.hidden) this.toggleSheet(false);
         else if (this.scrub >= 0) this.endScrub();
         else handled = false;
-      } else if ((k === "ArrowLeft" || k === "ArrowRight") && pts.length) {
+      } else if (["ArrowLeft", "h", "ArrowRight", "l"].includes(k) && pts.length) {
+        // h and l scrub too, as in Stonks' popup.
         const from = this.scrub >= 0 ? this.scrub : pts.length - 1;
-        this.scrubTo(Math.max(0, Math.min(pts.length - 1, from + (k === "ArrowLeft" ? -1 : 1))), true);
+        this.scrubTo(Math.max(0, Math.min(pts.length - 1, from + (k === "ArrowLeft" || k === "h" ? -1 : 1))), true);
       } else if (k === "p") this.replay();
       else if (k === "c") this.cycleChange();
       else if (!this.full) handled = false;

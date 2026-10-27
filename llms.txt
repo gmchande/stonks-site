@@ -9,7 +9,7 @@
 - Sessions: a smaller line under the price shows the pre-market, after-hours, or overnight price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.
 - Prices: quotes, charts, and search come from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with "As of" and its time.
 - Looks: retro (block digits and pixel columns), where it opens, or smooth, in the Omarchy theme's colors, light themes too.
-- Sounds: short sounds when you add a symbol, remove a row, or undo the removal, a shutter for a screenshot, chimes as you move along the chart, and a soft bell as the market opens and closes. The speaker at the top right, or m, turns them off.
+- Sounds: short sounds when you add a symbol, remove a row, or undo the removal, a shutter for a screenshot, chimes as you move along the chart, and a soft bell as the market opens and closes. Sounds start off: the speaker at the top right, or m, turns them on.
 - Screenshots: the camera at the top right, or Ctrl+C, makes a picture of the chart laid out to share, saved where Omarchy's own screenshots go and put on the clipboard.
 - Updates: never by itself. Once a day it checks for a newer version, and the footer offers it.
 - It doesn't track holdings, send price alerts, or convert prices into another currency, and it isn't investment advice.

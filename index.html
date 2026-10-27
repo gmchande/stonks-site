@@ -77,7 +77,7 @@
     { "@type": "Question", "name": "Which markets does Stonks follow?",
       "acceptedAnswer": { "@type": "Answer", "text": "Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts a price into another currency." } },
     { "@type": "Question", "name": "Does Stonks make sounds?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Click the speaker at the top right, or press m, to turn them off." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Sounds start off: click the speaker at the top right, or press m, to turn them on." } },
     { "@type": "Question", "name": "Does Stonks track my portfolio or send price alerts?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks doesn't track holdings, send price alerts, or convert prices into another currency. It shows prices and charts for the stocks you follow." } },
     { "@type": "Question", "name": "What does Stonks cost?",
@@ -121,7 +121,7 @@
     <figure class="demo-wrap">
       <div class="demo-tag" aria-hidden="true">DEMO · MADE-UP PRICES</div>
       <div class="popup" id="demo" role="group" aria-label="A working copy of Stonks' popup, with made-up symbols and prices"></div>
-      <figcaption>Made-up symbols and prices. Point at the chart to scrub back through the day, and click the bull or the bear to replay it. Once you've clicked on the page, it sounds as Stonks does: the speaker, or <kbd>m</kbd>, turns that off. Press <kbd>?</kbd> for keys.</figcaption>
+      <figcaption>Made-up symbols and prices. Point at the chart to scrub back through the day, and click the bull or the bear to replay it. Once you've clicked on the page, it plays Stonks' sounds: the speaker, or <kbd>m</kbd>, turns them off. Press <kbd>?</kbd> for keys.</figcaption>
     </figure>
   </div>
   <canvas class="skyline" aria-hidden="true"></canvas>
@@ -177,7 +177,7 @@
         <li>A short sound when you add a symbol, remove a row, or undo the removal, which plays the removal backwards, and a shutter when you take a screenshot.</li>
         <li>A soft bell as the market opens and as it closes, never while every screen is off or an app records from your microphone.</li>
         <li>Nothing else sounds by itself: no refresh or price.</li>
-        <li>Click the speaker at the top right, or press <kbd>m</kbd>, to turn them off. Your system volume sets how loud they are.</li>
+        <li>In Stonks, sounds start off: click the speaker at the top right, or press <kbd>m</kbd>, to turn them on, and again to turn them off. Your system volume sets how loud they are.</li>
       </ul>
     </div>
     <div class="sound-test">
@@ -243,7 +243,7 @@
     <div>
       <p class="wide">All holds every symbol you follow. Your own lists, such as a portfolio or a sector, hold some of them. Click the list's name to switch lists, start one, or manage them.</p>
       <ul class="plain-list">
-        <li>Ctrl-click a row to choose the lists it's in.</li>
+        <li>Ctrl-click a row, or select it and press <kbd>Ctrl+Enter</kbd>, to choose the lists it's in.</li>
         <li>Remove a row with the × beside its symbol, or <kbd>Delete</kbd>. Right-click it to choose where it goes from, such as "Remove from all 3 lists". Removing a symbol from All removes it everywhere.</li>
         <li>Removed one by mistake? For 5 seconds, "Undo NVDA" shows beside "+ Add a symbol": click it to bring the row back. Until a list next changes, <kbd>Ctrl+Z</kbd> does the same.</li>
         <li>Click the sign at the end of the list's header to show every row's move as a percent, an amount, or since the open.</li>
@@ -288,6 +288,7 @@
   <dl class="moves">
     <div data-keys="ArrowUp ArrowDown"><dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move the selection</dd></div>
     <div data-keys="Enter"><dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd></div>
+    <div data-keys="Ctrl+enter"><dt><kbd>Ctrl+⏎</kbd></dt><dd>Choose the selected row's lists</dd></div>
     <div data-keys="ArrowLeft ArrowRight"><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Scrub the chart one step</dd></div>
     <div data-keys="[ ]"><dt><kbd>[</kbd><kbd>]</kbd></dt><dd>Change the range</dd></div>
     <div data-keys="p"><dt><kbd>p</kbd></dt><dd>Replay the chart</dd></div>
@@ -298,7 +299,7 @@
     <div data-keys="Shift+ArrowUp Shift+ArrowDown"><dt><kbd>⇧↑</kbd><kbd>⇧↓</kbd></dt><dd>Move the row in your own order</dd></div>
     <div data-keys="o"><dt><kbd>o</kbd></dt><dd>Change the order</dd></div>
     <div data-keys="O"><dt><kbd>Shift+O</kbd></dt><dd>Reverse the order</dd></div>
-    <div data-keys="l"><dt><kbd>l</kbd></dt><dd>Open the list menu</dd></div>
+    <div data-keys="w"><dt><kbd>w</kbd></dt><dd>Open the list menu</dd></div>
     <div data-keys="c"><dt><kbd>c</kbd></dt><dd>Show the change as %, amount or since the open</dd></div>
     <div data-keys="s"><dt><kbd>s</kbd></dt><dd>Smooth or retro</dd></div>
     <div data-keys="m"><dt><kbd>m</kbd></dt><dd>Sound on or off</dd></div>
@@ -335,7 +336,7 @@
     <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>Stonks gets quotes, charts, and search from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with "As of" and its time.</p></section>
     <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.</p></section>
     <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts a price into another currency.</p></section>
-    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Click the speaker at the top right, or press m, to turn them off.</p></section>
+    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Sounds start off: click the speaker at the top right, or press m, to turn them on.</p></section>
     <section class="qa"><h3>Does Stonks track my portfolio or send price alerts?</h3><p>No. Stonks doesn't track holdings, send price alerts, or convert prices into another currency. It shows prices and charts for the stocks you follow.</p></section>
     <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT license.</p></section>
   </div>
