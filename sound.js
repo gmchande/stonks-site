@@ -282,12 +282,19 @@ window.Sound = (() => {
     return b;
   }
 
+  // A sound stopped, and when by the context's clock (`stoppedAt`): what
+  // it made before then still reaches the speakers.
+  function halt(src) {
+    src.stoppedAt = ctx.currentTime;
+    try { src.stop(); } catch { /* ended */ }
+  }
+
   function start(buffer, alone) {
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(ctx.destination);
     if (alone) {
-      if (solo) try { solo.stop(); } catch { /* ended */ }
+      if (solo) halt(solo);
       solo = src;
       src.onended = () => { if (solo === src) solo = null; };
     }
@@ -321,8 +328,9 @@ window.Sound = (() => {
   // The click that turns sound on is still starting the audio as it asks.
   // Resolves true once the speakers play it, by the output's clock
   // (`playing`), so what names it shows as it's heard; false if it doesn't
-  // sound: sound turned off, another fixed sound taking its place, or the
-  // output not reaching it within 1.5 s.
+  // sound: stopped before it began, as by sound turned off or another fixed
+  // sound taking its place, or the output not reaching it within 1.5 s.
+  // Stopped once begun, what it made still plays, so it counts as heard.
   function play(retro, name) {
     if (!on || !ctx) return Promise.resolve(false);
     return Promise.all([load(voice(retro), name), ctx.state === "running" || ctx.resume()])
@@ -331,8 +339,9 @@ window.Sound = (() => {
         const at = ctx.currentTime, src = start(b, true), since = performance.now();
         return new Promise((heard) => {
           const check = () => {
-            if (!ready() || solo !== src || performance.now() - since > 1500) heard(false);
+            if (src.stoppedAt !== undefined && src.stoppedAt <= at) heard(false);
             else if (playing() >= at) heard(true);
+            else if (performance.now() - since > 1500) heard(false);
             else setTimeout(check, 15);
           };
           check();
@@ -416,7 +425,7 @@ window.Sound = (() => {
     return o.contextTime + (performance.now() - o.performanceTime) / 1000;
   }
   function stopReplay() {
-    if (replaySource && solo === replaySource) try { replaySource.stop(); } catch { /* ended */ }
+    if (replaySource && solo === replaySource) halt(replaySource);
     replaySource = null;
   }
 
@@ -427,11 +436,11 @@ window.Sound = (() => {
     try { localStorage.setItem("stonks-sound", on ? "on" : "off"); } catch { /* not remembered */ }
     if (!on) {
       stopReplay();
-      if (solo) try { solo.stop(); } catch { /* ended */ }
+      if (solo) halt(solo);
       clearTimeout(waitTimer);
       waitTimer = 0;
       waiting = null;
-      for (const src of ringing) try { src.stop(); } catch { /* ended */ }
+      for (const src of ringing) halt(src);
       ringing.clear();
     }
     listeners.forEach((fn) => fn());
