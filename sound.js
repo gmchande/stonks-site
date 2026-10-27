@@ -321,6 +321,7 @@ window.Sound = (() => {
   // second, a bar struck sooner waiting out the gap and the latest waiting
   // winning; -1, a place with no bar, drops the one waiting.
   const chimes = { smooth: [], retro: [] };
+  const ringing = new Set(); // the chimes still sounding, which turning sound off stops
   let lastChime = -Infinity, waiting = null, waitTimer = 0;
   function strike(retro, bar) {
     clearTimeout(waitTimer);
@@ -329,7 +330,9 @@ window.Sound = (() => {
     lastChime = performance.now();
     const kept = chimes[voice(retro)];
     if (!kept[bar]) kept[bar] = bufferOf(retro ? retroBar(bar) : { samples: smoothBarSamples(bar), gain: 1 });
-    start(kept[bar], false);
+    const src = start(kept[bar], false);
+    ringing.add(src);
+    src.onended = () => ringing.delete(src);
   }
   function chime(retro, bar) {
     if (!ready()) return;
@@ -367,6 +370,11 @@ window.Sound = (() => {
     if (!on) {
       stopReplay();
       if (solo) try { solo.stop(); } catch { /* ended */ }
+      clearTimeout(waitTimer);
+      waitTimer = 0;
+      waiting = null;
+      for (const src of ringing) try { src.stop(); } catch { /* ended */ }
+      ringing.clear();
     }
     listeners.forEach((fn) => fn());
     if (on) { unlock(); play(retro, "add"); }

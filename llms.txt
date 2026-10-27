@@ -5,7 +5,7 @@
 - Install: `omarchy plugin add https://github.com/gmchande/omarchy-stonks.git --enable`. It needs Omarchy 4, which asks you to confirm, then where in the bar to put the pill.
 - Cost: free and open source, under the MIT license.
 - Account: none, and no API key.
-- Markets: stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. Stonks never converts currencies.
+- Markets: stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. Stonks never converts a price into another currency.
 - Sessions: a smaller line under the price shows the pre-market, after-hours, or overnight price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.
 - Prices: quotes, charts, and search come from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with "As of" and its time.
 - Looks: retro (block digits and pixel columns), where it opens, or smooth, in the Omarchy theme's colors, light themes too.

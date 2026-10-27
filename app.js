@@ -100,7 +100,8 @@
 
   // A range at the hero's clock: its points, its low and high (`lo`, `hi`),
   // and which points they are (`loI`, `hiI`), which the chart marks. The
-  // range's lowest and highest closes are always among its points.
+  // range's lowest and highest closes are always among its points, and, as
+  // in Stonks, today's low and high count too, marked on today.
   function rangeSeries(s, key, q) {
     s.ranges = s.ranges || {};
     if (s.ranges[key]) return s.ranges[key];
@@ -135,6 +136,8 @@
     pts.hi = Math.max(...values);
     pts.loI = values.indexOf(pts.lo);
     pts.hiI = values.indexOf(pts.hi);
+    if (q.low !== null && q.low < pts.lo) { pts.lo = q.low; pts.loI = pts.length - 1; }
+    if (q.high !== null && q.high > pts.hi) { pts.hi = q.high; pts.hiI = pts.length - 1; }
     s.ranges[key] = pts;
     return pts;
   }
@@ -388,14 +391,14 @@
 
     drawChart({ s, q, pts, base, day, key }) {
       const { ctx, w, h } = Cells.fit(this.el.chart);
-      const mark = (i, low) => ({ i, low, value: money(pts[i].v), date: `${pts[i].d.getDate()} ${MONTHS[pts[i].d.getMonth()]} ${pts[i].d.getFullYear()}` });
+      const mark = (i, v, low) => ({ i, v, low, value: money(v), date: `${pts[i].d.getDate()} ${MONTHS[pts[i].d.getMonth()]} ${pts[i].d.getFullYear()}` });
       const o = {
         scrub: this.scrub,
         reveal: this.reveal,
         lastCap: day && this.scrub < 0 ? q.lastRegular : -1,
         ticks: day ? Market.BELLS : [],
         scale: day && this.holdScale ? s.prints : null,
-        marks: day ? null : [mark(pts.hiI, false), mark(pts.loI, true)],
+        marks: day ? null : [mark(pts.hiI, pts.hi, false), mark(pts.loI, pts.lo, true)],
       };
       this.chart = Look.retro
         ? Cells.drawRetro(ctx, w, h, pts, base, { ...o, pixel: 6, gap: 1, ghost: 0.035 })
@@ -501,10 +504,14 @@
     remove(i) {
       if (this.symbols.length < 2) return;
       const [s] = this.symbols.splice(i, 1);
-      this.removed.push({ s, at: i });
-      this.undoable = { s, at: i };
+      const shown = this.sym === i;
       if (this.sym > i || this.sym === this.symbols.length) this.sym--;
       if (this.sel > i || this.sel === this.symbols.length) this.sel--;
+      // `left` is the chart that took a shown row's place, so its undo can
+      // show the row again if nobody has picked another chart since.
+      const removal = { s, at: i, shown, left: this.feat() };
+      this.removed.push(removal);
+      this.undoable = removal;
       Sound.play(Look.retro, "remove");
       clearTimeout(this.timers.undo);
       this.el.undo.textContent = `Undo ${s.sym}`;
@@ -513,13 +520,17 @@
       this.listChanged();
       this.el.rows.classList.add("calm");
     }
-    // A removed row back in its old place.
-    restore({ s, at }) {
+    // A removed row back in its old place, and selected, as Stonks puts
+    // it back; its chart shows again if the removal moved the chart off it
+    // and the chart is still the one it moved to.
+    restore({ s, at, shown, left }) {
       this.removed = this.removed.filter((r) => r.s !== s);
       const place = Math.min(at, this.symbols.length);
+      const back = shown && this.feat() === left;
       this.symbols.splice(place, 0, s);
-      if (this.sym >= place) this.sym++;
-      if (this.sel >= place) this.sel++;
+      if (back) this.sym = place;
+      else if (this.sym >= place) this.sym++;
+      this.sel = place;
       this.undoable = null;
       clearTimeout(this.timers.undo);
       this.el.undo.hidden = true;
@@ -541,9 +552,17 @@
       Sound.play(Look.retro, "add");
       this.restore(last);
     }
+    // The rows are drawn again. Focus that was on a row or a control that's
+    // gone moves to the selected row, so the demo's keys, Ctrl+Z among
+    // them, keep working.
     listChanged() {
+      const inside = this.root.contains(document.activeElement);
       this.buildRows();
       this.render();
+      const now = document.activeElement;
+      if (inside && (!this.root.contains(now) || now.offsetParent === null)) {
+        this.el.rows.children[this.sel].firstElementChild.focus({ preventScroll: true });
+      }
     }
 
     setSymbol(i) {

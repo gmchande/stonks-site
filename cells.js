@@ -217,12 +217,13 @@ window.Cells = (() => {
 
   // A range's high and low marked on the chart, as Stonks' RangeMarks: the
   // price, then its date, over the high and under the low, running from
-  // the point toward the chart's middle. `at(i)` is where print i is drawn.
+  // the point toward the chart's middle. `at(i, v)` is where value v sits
+  // at print i: a mark's value can be today's low or high, not a print.
   function drawMarks(ctx, w, h, marks, at) {
     ctx.save();
     ctx.font = `12px ${v("--mono")}`;
     for (const m of marks) {
-      const { x, top, bottom } = at(m.i);
+      const { x, top, bottom } = at(m.i, m.v);
       const value = `${m.value} `;
       const width = ctx.measureText(value + m.date).width;
       const left = Math.max(0, Math.min(w - width, x > w / 2 ? x - width : x));
@@ -244,7 +245,7 @@ window.Cells = (() => {
     const pixel = o.pixel, gap = o.gap, pitch = pixel + gap;
     const cols = Math.max(1, Math.floor(w / pitch));
     const rows = Math.max(1, Math.floor(h / pixel));
-    const norm = normFor(o.scale || pts, base, o.marks ? 0.2 : 0.08);
+    const norm = normFor((o.scale || pts).concat(o.marks || []), base, o.marks ? 0.2 : 0.08);
     const baseRow = Math.round(norm(base) * (rows - 1));
     const baseY = baseRow * pixel;
     if (o.ghost) {
@@ -266,8 +267,8 @@ window.Cells = (() => {
       levels[c] = Math.round(norm(p.v) * (rows - 1));
       ext[c] = !!p.ext;
     }
-    // A column shows its last print, but a marked high or low shows itself.
-    for (const m of o.marks || []) levels[colOf(pts[m.i])] = Math.round(norm(pts[m.i].v) * (rows - 1));
+    // A column shows its last print, but a marked high or low print shows itself.
+    for (const m of o.marks || []) if (pts[m.i].v === m.v) levels[colOf(pts[m.i])] = Math.round(norm(m.v) * (rows - 1));
     const reveal = o.reveal == null || o.reveal >= 1 ? cols : Math.ceil(cols * o.reveal);
     const stem = o.stem || 0.35;
     for (let c = 0; c < reveal; c++) {
@@ -296,9 +297,9 @@ window.Cells = (() => {
       ctx.fillRect(c * pitch, levels[c] * pixel, pixel, pixel);
     }
     if (o.marks && reveal >= cols) {
-      drawMarks(ctx, w, h, o.marks, (i) => {
-        const c = colOf(pts[i]);
-        return { x: c * pitch + pixel / 2, top: levels[c] * pixel, bottom: (levels[c] + 1) * pixel };
+      drawMarks(ctx, w, h, o.marks, (i, value) => {
+        const row = Math.round(norm(value) * (rows - 1));
+        return { x: colOf(pts[i]) * pitch + pixel / 2, top: row * pixel, bottom: (row + 1) * pixel };
       });
     }
     return { retro: true, grid: { columns: cols, rows, levels, baseRow } };
@@ -310,7 +311,7 @@ window.Cells = (() => {
   function drawSmooth(ctx, w, h, pts, base, o) {
     if (!pts.length) return;
     const pad = o.pad == null ? 6 : o.pad;
-    const norm = normFor(o.scale || pts, base, o.marks ? 0.2 : 0.08);
+    const norm = normFor((o.scale || pts).concat(o.marks || []), base, o.marks ? 0.2 : 0.08);
     const X = (x) => 1 + x * (w - 2);
     const Y = (value) => pad + norm(value) * (h - 2 * pad);
     const by = Math.round(Y(base)) + 0.5;
@@ -370,7 +371,7 @@ window.Cells = (() => {
       const p = pts[o.lastCap];
       dot(p, 4, p.v >= base ? COL.up : COL.down);
     }
-    if (o.marks && clipW >= w) drawMarks(ctx, w, h, o.marks, (i) => ({ x: X(pts[i].x), top: Y(pts[i].v), bottom: Y(pts[i].v) }));
+    if (o.marks && clipW >= w) drawMarks(ctx, w, h, o.marks, (i, value) => ({ x: X(pts[i].x), top: Y(value), bottom: Y(value) }));
     return { retro: false, geometry: { points: pts.map((p) => ({ x: p.x, y: norm(p.v) })) } };
   }
 

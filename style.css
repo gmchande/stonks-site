@@ -444,7 +444,8 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 @media (max-width: 640px) {
   body { font-size: 15px; }
   .topbar { padding: 0 14px; letter-spacing: 0.06em; }
-  .topbar nav { gap: 14px; }
+  .topbar nav { gap: 12px; }
+  .speaker { padding: 0; }
   .speaker-word { display: none; }
   .hero { padding: 36px 16px 0; }
   .eyebrow { margin-bottom: 20px; font-size: 12px; }

@@ -31,7 +31,9 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- display=optional: the font is used when it arrives at once, else this visit keeps the
+     fallback, so no text reflows and moves the page as it lands. -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=optional" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script>document.documentElement.classList.add("js")</script>
 
@@ -75,7 +77,7 @@
     { "@type": "Question", "name": "Does Stonks show pre-market, after-hours, and overnight prices?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market." } },
     { "@type": "Question", "name": "Which markets does Stonks follow?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts currencies." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts a price into another currency." } },
     { "@type": "Question", "name": "Does Stonks make sounds?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Click the speaker at the top right, or press m, to turn them off." } },
     { "@type": "Question", "name": "Does Stonks track my portfolio or send price alerts?",
@@ -297,18 +299,18 @@
     <div data-keys="Ctrl+z"><dt><kbd>Ctrl+Z</kbd></dt><dd>Undo a removal</dd></div>
     <div data-keys="Shift+ArrowUp Shift+ArrowDown"><dt><kbd>⇧↑</kbd><kbd>⇧↓</kbd></dt><dd>Move the row in your own order</dd></div>
     <div data-keys="o"><dt><kbd>o</kbd></dt><dd>Change the order</dd></div>
-    <div data-keys="O"><dt><kbd>O</kbd></dt><dd>Reverse the order</dd></div>
+    <div data-keys="O"><dt><kbd>Shift+O</kbd></dt><dd>Reverse the order</dd></div>
     <div data-keys="l"><dt><kbd>l</kbd></dt><dd>Open the list menu</dd></div>
     <div data-keys="c"><dt><kbd>c</kbd></dt><dd>Show the change as %, amount or since the open</dd></div>
     <div data-keys="s"><dt><kbd>s</kbd></dt><dd>Smooth or retro</dd></div>
     <div data-keys="m"><dt><kbd>m</kbd></dt><dd>Sound on or off</dd></div>
     <div data-keys="r"><dt><kbd>r</kbd></dt><dd>Refresh</dd></div>
-    <div data-keys="U"><dt><kbd>U</kbd></dt><dd>Update Stonks when a newer one is out, then restart the shell</dd></div>
+    <div data-keys="U"><dt><kbd>Shift+U</kbd></dt><dd>Update Stonks when a newer one is out, then restart the shell</dd></div>
     <div data-keys="Tab Shift+Tab"><dt><kbd>Tab</kbd><kbd>⇧Tab</kbd></dt><dd>Next or previous panel on the bar (popup)</dd></div>
     <div data-keys="?"><dt><kbd>?</kbd></dt><dd>All keys</dd></div>
     <div data-keys="Escape"><dt><kbd>Esc</kbd></dt><dd>Close</dd></div>
   </dl>
-  <p class="note keys-only">Press one of these keys to light up its move. On this page, <kbd>s</kbd> and <kbd>m</kbd> work too.</p>
+  <p class="note"><span class="keys-only">Press one of these keys to light up its move. On this page, <kbd>s</kbd> and <kbd>m</kbd> work too. </span>The same table is in the <a href="https://github.com/gmchande/omarchy-stonks#keys">README</a>.</p>
 </section>
 
 <section class="stage" id="rules">
@@ -334,7 +336,7 @@
     <section class="qa"><h3>Does Stonks need an account or an API key?</h3><p>No. Stonks needs no account and no API key.</p></section>
     <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>Stonks gets quotes, charts, and search from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with "As of" and its time.</p></section>
     <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. Stonks shows the pre-market, after-hours, or overnight price on a smaller line under the price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.</p></section>
-    <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts currencies.</p></section>
+    <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stonks follows stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. It never converts a price into another currency.</p></section>
     <section class="qa"><h3>Does Stonks make sounds?</h3><p>Yes, short ones: when you add a symbol, remove a row, or undo the removal, and a shutter when you take a screenshot. Moving along the chart plays it like a row of chimes, and a soft bell rings as the market opens and closes. Click the speaker at the top right, or press m, to turn them off.</p></section>
     <section class="qa"><h3>Does Stonks track my portfolio or send price alerts?</h3><p>No. Stonks doesn't track holdings, send price alerts, or convert prices into another currency. It shows prices and charts for the stocks you follow.</p></section>
     <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT license.</p></section>
