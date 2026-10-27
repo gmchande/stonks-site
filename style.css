@@ -1,3 +1,15 @@
+/* JetBrains Mono, the page's own copy (fonts/OFL.txt): Google Fonts' Latin
+   file, one variable font for every weight. Optional, so a font that comes
+   late is never swapped in, and no text reflows and moves the page. */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: optional;
+  src: url("fonts/jetbrains-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Tokyo Night, Omarchy's default theme: the colors the README's pictures wear.
    Green and red mean up and down only; blue, the accent, means selected. */
 :root {
@@ -500,8 +512,10 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   /* The text form's longest, HISCORE 1,284.54 ▼0.15%, clears the workspace numbers. */
   .pill { font-size: 13px; gap: 6px; padding: 0 6px; }
   .pill .arrow { font-size: 13px; }
-  .tool { width: 21px; }
+  .tool { width: 20px; }
   .pop-head { gap: 8px; }
+  /* "closes in 1h 15m" whole, beside the four icons. */
+  .status { letter-spacing: 0; }
 }
 
 /* A short landscape screen: the clock beside the popup, the chart lower,

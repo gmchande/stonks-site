@@ -524,6 +524,7 @@
     // it back; its chart shows again if the removal moved the chart off it
     // and the chart is still the one it moved to.
     restore({ s, at, shown, left }) {
+      const inside = this.root.contains(document.activeElement); // before Undo hides, losing focus
       this.removed = this.removed.filter((r) => r.s !== s);
       const place = Math.min(at, this.symbols.length);
       const back = shown && this.feat() === left;
@@ -534,7 +535,7 @@
       this.undoable = null;
       clearTimeout(this.timers.undo);
       this.el.undo.hidden = true;
-      this.listChanged();
+      this.listChanged(inside);
     }
     undo() {
       if (!this.undoable) return;
@@ -555,8 +556,7 @@
     // The rows are drawn again. Focus that was on a row or a control that's
     // gone moves to the selected row, so the demo's keys, Ctrl+Z among
     // them, keep working.
-    listChanged() {
-      const inside = this.root.contains(document.activeElement);
+    listChanged(inside = this.root.contains(document.activeElement)) {
       this.buildRows();
       this.render();
       const now = document.activeElement;

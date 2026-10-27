@@ -29,11 +29,9 @@
 <meta name="twitter:image" content="https://getstonks.app/share.png">
 <meta name="twitter:image:alt" content="The Stonks wordmark in block letters beside its retro popup: a made-up stock's price in block digits over a day chart of pixel columns, with the bull.">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- display=optional: the font is used when it arrives at once, else this visit keeps the
-     fallback, so no text reflows and moves the page as it lands. -->
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=optional" rel="stylesheet">
+<!-- The page's own copy of the font, asked for first, so it's there before the text is drawn
+     (style.css's @font-face says why it never swaps in late). -->
+<link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 <script>document.documentElement.classList.add("js")</script>
 
