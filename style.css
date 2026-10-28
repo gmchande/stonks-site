@@ -153,7 +153,7 @@ button { font: inherit; color: inherit; }
 
 .skyline { display: block; width: 100%; height: 120px; margin-top: 64px; }
 
-/* The demo popup, at the shell's size. */
+/* The demo panel, at the shell's size. */
 .demo-wrap { margin: 0; position: relative; }
 .demo-tag {
   position: absolute; top: -13px; right: 18px; z-index: 2;
@@ -357,7 +357,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 .not-title { margin: 0 0 12px; }
 .not-label p:last-child { color: var(--fg); margin: 0; }
 
-/* One day: the popup held in view while the clock follows the scroll. */
+/* One day: the panel held in view while the clock follows the scroll. */
 .day-head { padding-bottom: 0; }
 .day-track { position: relative; }
 .js .day-track { height: 240vh; }
@@ -537,7 +537,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .status { letter-spacing: 0; }
 }
 
-/* A short landscape screen: the clock beside the popup, the chart lower,
+/* A short landscape screen: the clock beside the panel, the chart lower,
    so the whole day fits while it is pinned. */
 @media (max-height: 600px) and (orientation: landscape) {
   .day-sticky { flex-direction: row; gap: 24px; padding: 8px 16px; }

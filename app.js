@@ -1,4 +1,4 @@
-// Stonks' landing page: the popups, the day, the pill, the themes, the keys.
+// Stonks' landing page: the panels, the day, the pill, the themes, the keys.
 // Every price drawn here is made up (market.js).
 (() => {
   "use strict";
@@ -16,7 +16,7 @@
     return (n > 0 ? "+" : "\u2212") + a;
   }
 
-  // ---- The look, page-wide: every popup, the pill, and the theme picture.
+  // ---- The look, page-wide: every panel, the pill, and the theme picture.
 
   const Look = {
     value: "retro",
@@ -184,7 +184,7 @@
     return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
   }
 
-  // ---- A popup: the hero's whole one, or the day's compact one.
+  // ---- A panel: the hero's whole one, or the day's compact one.
 
   const LOOK_ICONS = {
     toSmooth: `<svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1,12 6,6 10,9 17,2"/></svg>`,
@@ -703,7 +703,7 @@
         else if (this.scrub >= 0) this.endScrub();
         else handled = false;
       } else if (["ArrowLeft", "h", "ArrowRight", "l"].includes(k) && pts.length) {
-        // h and l scrub too, as in Stonks' popup.
+        // h and l scrub too, as in Stonks' panel.
         const from = this.scrub >= 0 ? this.scrub : pts.length - 1;
         this.scrubTo(Math.max(0, Math.min(pts.length - 1, from + (k === "ArrowLeft" || k === "h" ? -1 : 1))), true);
       } else if (k === "p") this.replay();
@@ -723,11 +723,11 @@
     }
   }
 
-  // ---- The hero's popup
+  // ---- The hero's panel
 
   const hero = new Popup(document.getElementById("demo"), { symbols: Market.SYMBOLS, clock: HERO_CLOCK, full: true });
 
-  // ---- One day: a popup held in view while the clock follows the scroll.
+  // ---- One day: a panel held in view while the clock follows the scroll.
 
   const daySection = document.getElementById("day");
   const dayPop = new Popup(document.getElementById("daypop"), { symbols: [Market.SYMBOLS[0]], clock: Market.PRE, full: false, holdScale: true });
@@ -895,7 +895,7 @@
     try { await next.decode(); } catch { /* shown below as it loads */ }
     if (src !== themeSrc(theme[0], Look.value)) return; // a later choice won
     themeImg.src = src;
-    themeImg.alt = `Stonks' popup in ${look}, in the ${name} theme: the price, the day's chart, and the list.`;
+    themeImg.alt = `Stonks' panel in ${look}, in the ${name} theme: the price, the day's chart, and the list.`;
     themeGround.style.backgroundColor = ground;
     themeCap.textContent = `${name}, ${look}.`;
   }
@@ -934,7 +934,7 @@
     if (key === "m") Sound.toggle(Look.retro, joining());
   });
 
-  // ---- The speakers: the bar's and each popup's say whether sound is on,
+  // ---- The speakers: the bar's and each panel's say whether sound is on,
   // off, or on and waiting for the reader's first click or key, which the
   // browser needs before anything sounds; and a press starts it, or turns
   // it on or off.
@@ -1153,7 +1153,7 @@
     resizeTimer = setTimeout(() => { dayCell = 0; paintAll(); followScroll(); }, 120);
   });
 
-  // Attract mode: the first time the hero's popup comes into view, it
+  // Attract mode: the first time the hero's panel comes into view, it
   // replays its day, unless the reader is already replaying or scrubbing it.
   if (!reducedMotion.matches && "IntersectionObserver" in window) {
     const io = new IntersectionObserver((entries) => {
