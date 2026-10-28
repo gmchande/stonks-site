@@ -8,11 +8,11 @@
 - Markets: stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it.
 - Sessions: a smaller line under the price shows the pre-market, after-hours, or overnight price. Overnight prices cover the US stocks and ETFs that trade overnight on Robinhood. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.
 - Prices: quotes, charts, and search come from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo sends some exchanges' prices late, and Stonks marks an old price with "As of" and its time.
-- Looks: retro, with block digits and pixel columns, which Stonks opens in, or smooth. Both draw in the Omarchy theme's colors, light themes too.
-- Sounds: off until you turn them on with the speaker at the top right, or m. Then adding or removing a row makes a short sound, a screenshot sounds a shutter, the chart chimes as you run the pointer along it, and a soft bell rings as the market opens and closes.
+- Looks: Stonks opens in retro, with block digits and pixel columns. Smooth uses plain digits and a line chart. Both use the Omarchy theme's colors, on light themes too. If its green and red are missing, too alike, or too faint, Stonks uses its own.
+- Sounds: off until you turn them on with the speaker at the top right, or m. Then adding or removing a row makes a short sound. Taking a screenshot makes a shutter sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at.
 - Screenshots: the camera at the top right, or Ctrl+C, makes a picture of the chart sized so X shows it whole. Stonks saves it with Omarchy's own screenshots and copies it to the clipboard.
 - Updates: never by itself. Once a day it checks for a new version, and the footer offers it.
-- It doesn't track your holdings, send price alerts, or convert currencies, and it isn't investment advice.
+- It doesn't track your holdings or send price alerts. It never converts prices, and it isn't investment advice.
 
 ## Links
 

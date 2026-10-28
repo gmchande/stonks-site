@@ -258,7 +258,7 @@
             <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one step</dd>
             <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the range</dd>
             <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Show the change as a percent, an amount, or since the open</dd>
+            <dt><kbd>c</kbd></dt><dd>Show the change another way</dd>
             <dt><kbd>s</kbd></dt><dd>Smooth or retro</dd>
             <dt><kbd>m</kbd></dt><dd>Sound on or off</dd>
             <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
@@ -403,7 +403,7 @@
       el.change.textContent = signed(move.n, retro, move.pct ? "%" : "");
       el.change.className = `change ${tone(move.n) || "flat"}`;
       el.change.disabled = !day;
-      el.change.setAttribute("aria-label", `${el.change.textContent}. ${day ? "Show the change as a percent, an amount, or since the open." : ""}`);
+      el.change.setAttribute("aria-label", `${el.change.textContent}. ${day ? "Show the day's change as a percent or an amount, or since the open." : ""}`);
 
       const ext = !scrubbed && day ? q.ext : null;
       if (ext) {
@@ -585,7 +585,7 @@
     putBack() {
       const last = this.removed[this.removed.length - 1];
       if (!last) {
-        this.toast("In Stonks, this searches for any stock, ETF, index, or crypto.", 3000);
+        this.toast("In Stonks, this searches by name or symbol.", 3000);
         return;
       }
       Sound.play(Look.retro, "add");
