@@ -258,7 +258,7 @@
             <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one step</dd>
             <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the range</dd>
             <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Cycle the day's change</dd>
+            <dt><kbd>c</kbd></dt><dd>Show the change another way</dd>
             <dt><kbd>s</kbd></dt><dd>Smooth or retro</dd>
             <dt><kbd>m</kbd></dt><dd>Sound on or off</dd>
             <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
@@ -375,7 +375,7 @@
       el.animal.hidden = !dir;
       if (dir) {
         el.animal.innerHTML = Cells.spriteSVG(Cells.sprite(dir === "up", asleep), 2, dir === "up" ? COL.up : COL.down);
-        el.animal.setAttribute("aria-label", `Replay the chart (the ${dir === "up" ? "bull" : "bear"}${asleep ? ", asleep" : ""})`);
+        el.animal.setAttribute("aria-label", "Replay the chart");
       }
       el.zz.innerHTML = asleep && dir ? Cells.spriteSVG(Cells.SLEEP_Z, 2, rgba(COL.fg, 0.5)) : "";
       el.title.textContent = s.name;
@@ -403,7 +403,7 @@
       el.change.textContent = signed(move.n, retro, move.pct ? "%" : "");
       el.change.className = `change ${tone(move.n) || "flat"}`;
       el.change.disabled = !day;
-      el.change.setAttribute("aria-label", `${el.change.textContent}. ${day ? "Show the change as a percent, an amount, or since the open." : ""}`);
+      el.change.setAttribute("aria-label", `${el.change.textContent}. ${day ? "Show the day's change as a percent or an amount, or since the open." : ""}`);
 
       const ext = !scrubbed && day ? q.ext : null;
       if (ext) {
@@ -534,7 +534,7 @@
       this.root.classList.remove("flash");
       void this.root.offsetWidth;
       this.root.classList.add("flash");
-      this.toast(`In Stonks, a picture of this chart. <a href="#screenshot">See one</a>`, 5000);
+      this.toast(`In Stonks, this saves a picture of the chart. <a href="#screenshot">See one</a>`, 5000);
     }
 
     // A removal takes the row out, and for 5 seconds "Undo …" shows beside
@@ -585,7 +585,7 @@
     putBack() {
       const last = this.removed[this.removed.length - 1];
       if (!last) {
-        this.toast("In Stonks, this searches for any stock, ETF, index, or coin.", 3000);
+        this.toast("In Stonks, this searches by name or symbol.", 3000);
         return;
       }
       Sound.play(Look.retro, "add");
@@ -843,7 +843,7 @@
       // The day's animal: the bull up, the bear down, nothing on a flat day.
       pill.innerHTML = t ? Cells.spriteSVG(Cells.sprite(t === "up", false), 2, color) : "";
     }
-    pill.setAttribute("aria-label", `Stonks' pill as ${form === "icon" ? `the ${t === "up" ? "bull" : t === "down" ? "bear" : "day's animal"}` : `a ${form}`}, made-up prices: ${s.sym} ${signed(q.pct, false, "%")}. Click to change its form.`);
+    pill.setAttribute("aria-label", `Stonks' pill as ${{ sparkline: "a sparkline", arrow: "an arrow", text: "the price as text", icon: "an icon for the day" }[form]}, made-up prices: ${s.sym} ${signed(q.pct, false, "%")}. Click to switch what it shows.`);
     formButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.form === form)));
   }
   const setForm = (f) => { form = f; renderPill(); };
@@ -1052,8 +1052,8 @@
 
   function paintSoundState() {
     if (!Sound.on) soundState.textContent = "Sound is off. Press m, or click the speaker, to turn it on.";
-    else if (!Sound.heard) soundState.textContent = "Sound is on, and starts once you click or press a key on this page.";
-    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s for the other look's, and m to turn sound off.`;
+    else if (!Sound.heard) soundState.textContent = "Sound is on. It starts with your first click or key on this page.";
+    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s to hear the other look, or m to turn sound off.`;
   }
   Sound.onChange(paintSoundState);
   Look.on(() => { stripTo(-1); paintSoundState(); });
