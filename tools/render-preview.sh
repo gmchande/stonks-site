@@ -2,7 +2,7 @@
 # Renders tools/preview-card.html to OUT (3200 x 1600), Stonks' preview.png:
 # the README's first picture and the plugin marketplace's. GRABS holds
 # Stonks' own pictures the card shows, from its test/qml/readme.sh
-# --marketplace: strip.png (scale 6) and popup.png (scale 3). Needs Chromium and
+# --marketplace: strip.png (scale 6) and popup.png (scale 3, the panel). Needs Chromium and
 # ImageMagick.
 #
 #   tools/render-preview.sh GRABS OUT

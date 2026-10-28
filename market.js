@@ -1,4 +1,4 @@
-// The made-up market every popup on the page draws, and the words Stonks
+// The made-up market every panel on the page draws, and the words Stonks
 // puts on it: a Tuesday in New York, in minutes since midnight. The phases,
 // their names, and the header's words follow Stonks' Market.js; the prices
 // are made up, the same on every visit.

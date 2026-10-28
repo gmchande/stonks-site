@@ -22,12 +22,12 @@
 <meta property="og:image" content="https://getstonks.app/share.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its popup: a made-up stock's price over the day's chart in pixel columns.">
+<meta property="og:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Stonks: a stock ticker and watchlist for the Omarchy bar">
 <meta name="twitter:description" content="A small pill in your Omarchy bar shows how a stock is doing today. Click it for the chart and your lists. Free, with no account or API key.">
 <meta name="twitter:image" content="https://getstonks.app/share.png">
-<meta name="twitter:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its popup: a made-up stock's price over the day's chart in pixel columns.">
+<meta name="twitter:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
 
 <!-- The page's own copy of the font, asked for first, so it's there before the text is drawn
      (style.css's @font-face says why it never swaps in late). -->
@@ -120,7 +120,7 @@
 
     <figure class="demo-wrap">
       <div class="demo-tag" aria-hidden="true">DEMO · MADE-UP PRICES</div>
-      <div class="popup" id="demo" role="group" aria-label="A demo of Stonks' popup, with made-up symbols and prices"></div>
+      <div class="popup" id="demo" role="group" aria-label="A demo of Stonks' panel, with made-up symbols and prices"></div>
       <figcaption>Try it. Run the pointer along the chart to go back through the day, or click the icon at the top left to replay it. Sound starts with your first click or key, and the speaker or <kbd>m</kbd> turns it off. Press <kbd>?</kbd> for the keys.</figcaption>
     </figure>
   </div>
@@ -141,7 +141,7 @@
       </div>
       <div class="day-pop">
         <div class="demo-tag" aria-hidden="true">MADE-UP PRICES</div>
-        <div class="popup compact" id="daypop" role="group" aria-label="Stonks' popup through a made-up Tuesday"></div>
+        <div class="popup compact" id="daypop" role="group" aria-label="Stonks' panel through a made-up Tuesday"></div>
       </div>
     </div>
   </div>
@@ -150,7 +150,7 @@
 <section class="stage" id="bar">
   <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="2" data-cell="6" aria-hidden="true"></span><span class="sr">2</span><span>IN YOUR BAR</span></p>
   <h2>A pill in your bar.</h2>
-  <p class="wide">The pill shows how the stock you last looked at is doing today. Scroll over it to step through your list. Click it for the popup, right-click it for the window, and drag it to move it along the bar. Middle-click it to switch what it shows: a sparkline, an arrow, the price as text, or an icon.</p>
+  <p class="wide">The pill shows how the stock you last looked at is doing today. Scroll over it to step through your list. Click it for the panel, right-click it for the window, and drag it to move it along the bar. Middle-click it to switch what it shows: a sparkline, an arrow, the price as text, or an icon.</p>
   <div class="bar-demo">
     <div class="fake-bar" aria-hidden="true">
       <span class="ws"><b>1</b><i>2</i><i>3</i><i>4</i></span>
@@ -224,7 +224,7 @@
       <li>Pre-market, after-hours, and overnight prices, and when the market opens or closes.</li>
       <li>Prices as Yahoo and Robinhood send them, in each listing's own currency and its exchange's own time.</li>
       <li>The 52-week low and high, the market cap, and the P/E.</li>
-      <li>A tiled window too, with the popup's chart and rows at the window's width.</li>
+      <li>A tiled window too, with the panel's chart and rows at the window's width.</li>
       <li>An old price says "As of" and its time. A "!" on the pill means a refresh failed or is late.</li>
       <li>Light on your computer: Stonks fetches nothing while every screen is off, and fetches each stock only as often as its market moves.</li>
     </ul>
@@ -274,7 +274,7 @@
       <div class="chips" data-group="light" role="group" aria-label="Light themes"></div>
     </div>
     <figure class="theme-shot">
-      <div class="theme-ground"><img src="img/themes/tokyo-night-retro.webp" alt="Stonks' popup in retro, in the Tokyo Night theme: the price, the day's chart, and the list." width="944" height="1364" loading="lazy"></div>
+      <div class="theme-ground"><img src="img/themes/tokyo-night-retro.webp" alt="Stonks' panel in retro, in the Tokyo Night theme: the price, the day's chart, and the list." width="944" height="1364" loading="lazy"></div>
       <figcaption>Tokyo Night, retro.</figcaption>
     </figure>
   </div>
@@ -304,7 +304,7 @@
     <div data-keys="m"><dt><kbd>m</kbd></dt><dd>Turn sounds on or off</dd></div>
     <div data-keys="r"><dt><kbd>r</kbd></dt><dd>Refresh</dd></div>
     <div data-keys="U"><dt><kbd>Shift+U</kbd></dt><dd>Update Stonks when a new version is out; once it's done, press again to restart the shell</dd></div>
-    <div data-keys="Tab Shift+Tab"><dt><kbd>Tab</kbd><kbd>⇧Tab</kbd></dt><dd>Next or previous panel on the bar (popup)</dd></div>
+    <div data-keys="Tab Shift+Tab"><dt><kbd>Tab</kbd><kbd>⇧Tab</kbd></dt><dd>Next or previous panel on the bar (panel only)</dd></div>
     <div data-keys="?"><dt><kbd>?</kbd></dt><dd>Show every key</dd></div>
     <div data-keys="Escape"><dt><kbd>Esc</kbd></dt><dd>Close</dd></div>
   </dl>
