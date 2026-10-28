@@ -20,7 +20,7 @@
   --line: #2f334d;
   --fg: #c0caf5;
   --text: #a9b1d6;
-  --muted: #737aa2;
+  --muted: #7f87ae; /* Tokyo Night's #737aa2, lifted to 4.5:1 on --surface, so small text reads */
   --faint: #565f89;
   --up: #9ece6a;
   --down: #f7768e;
@@ -307,7 +307,6 @@ button { font: inherit; color: inherit; }
 .stage { max-width: 1080px; margin: 0 auto; padding: 96px 24px 24px; }
 .stage-label { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; min-height: 30px; }
 .stage-label .blocks { margin-right: 6px; }
-.stage-word { color: var(--faint); }
 h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; letter-spacing: -0.02em; }
 .wide { max-width: 44em; font-size: 17px; }
 .note { max-width: 44em; font-size: 14px; color: var(--muted); }
@@ -349,8 +348,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   border: 2px solid var(--line); background: var(--surface); box-shadow: var(--shadow);
 }
 .label-list { list-style: none; margin: 0; padding: 26px 30px; }
-.label-list li { position: relative; padding: 9px 0 9px 28px; border-bottom: 1px dashed var(--line); color: var(--fg); }
-.label-list li:last-child { border-bottom: 0; }
+.label-list li { position: relative; padding: 9px 0 9px 28px; color: var(--fg); }
 .label-list li::before {
   content: ""; position: absolute; left: 0; top: 17px; width: 10px; height: 10px; background: var(--muted);
   box-shadow: 4px 4px 0 var(--bg-deep);
@@ -384,7 +382,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 
 .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 480px); gap: 48px; align-items: start; }
 .plain-list { margin: 20px 0 0; padding: 0; list-style: none; }
-.plain-list li { padding: 10px 0; border-bottom: 1px dashed var(--line); color: var(--fg); }
+.plain-list li { padding: 10px 0; color: var(--fg); }
 .shots { display: grid; gap: 16px; }
 .shots img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); background: var(--bg); }
 
@@ -423,19 +421,19 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 @media (hover: none) { .keys-only { display: none; } }
 
 .moves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; margin: 30px 0; }
-.moves div { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; padding: 10px 8px; border-bottom: 1px dashed var(--line); transition: background-color 160ms ease-out; }
+.moves div { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; padding: 10px 8px; transition: background-color 160ms ease-out; }
 .moves div.lit { background: var(--raise); }
 .moves div.lit kbd { border-color: var(--accent); }
 .moves dt { display: flex; gap: 6px; }
 .moves dd { margin: 0; color: var(--fg); }
 
 .faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; margin-top: 30px; }
-.qa { padding: 18px 0; border-top: 1px dashed var(--line); }
+.qa { padding: 18px 0; }
 .qa h3 { margin: 0 0 8px; font-size: 16px; color: var(--fg); }
 .qa p { margin: 0; }
 
 .rules { margin: 30px 0 0; border-top: 2px solid var(--line); }
-.rules div { display: grid; grid-template-columns: 140px 1fr; gap: 24px; padding: 16px 0; border-bottom: 1px dashed var(--line); }
+.rules div { display: grid; grid-template-columns: 140px 1fr; gap: 24px; padding: 16px 0; }
 .rules dt { color: var(--muted); letter-spacing: 0.16em; font-size: 13px; padding-top: 2px; }
 .rules dd { margin: 0; color: var(--fg); }
 
