@@ -118,6 +118,8 @@ window.Cells = (() => {
   const BEAR_SHUT = BEAR.slice();
   BEAR_SHUT[6] = ".####..######..####.";
   const SLEEP_Z = ["###", "..#", ".#.", "#..", "###"];
+  // A row's remove button in retro: an × in the rows' 2 px cells.
+  const REMOVE = ["#...#", ".#.#.", "..#..", ".#.#.", "#...#"];
 
   function spriteSVG(rows, cell, color) {
     const w = rows[0].length * cell;
@@ -149,6 +151,48 @@ window.Cells = (() => {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="${color}" shape-rendering="crispEdges">${rects}</svg>`;
   }
 
+  // The header's speaker and camera and the rows' unit signs, as Stonks'
+  // Cells.js draws them: each a path on a grid of cells 3 px apart, scaled
+  // with the cell, the pen with it (GridIcon). "A" is an arc: center,
+  // radius, from and to degrees, clockwise.
+  const SOUND_CONE = [["M", 0.5, 3.5], ["L", 3.5, 3.5], ["L", 7.5, 0.5], ["L", 7.5, 10.5], ["L", 3.5, 7.5], ["L", 0.5, 7.5], ["Z"], ["fill"]];
+  const CAMERA_BODY = [["M", 0.5, 3], ["L", 4.8, 3], ["L", 6.3, 0.5], ["L", 10.7, 0.5], ["L", 12.2, 3], ["L", 16.5, 3], ["L", 16.5, 10.5], ["L", 0.5, 10.5], ["Z"],
+    ["M", 11.3, 6.6], ["A", 8.5, 6.6, 2.8, 0, 359.9], ["Z"], ["hollow"]];
+  const ICONS = {
+    soundOn: { columns: 6, rows: 4, path: SOUND_CONE.concat([["A", 7, 5.5, 3.8, -50, 50], ["stroke"], ["A", 7, 5.5, 7.4, -50, 50], ["stroke"]]) },
+    soundOff: { columns: 6, rows: 4, path: SOUND_CONE.concat([["M", 10.5, 3.5], ["L", 14.5, 7.5], ["stroke"], ["M", 14.5, 3.5], ["L", 10.5, 7.5], ["stroke"]]) },
+    // The page's own: on, and waiting for the reader's first click or key.
+    soundWaiting: { columns: 6, rows: 4, path: SOUND_CONE },
+    camera: { columns: 6, rows: 4, path: CAMERA_BODY },
+    cameraLit: { columns: 6, rows: 4, path: CAMERA_BODY.concat([["dot", 8.5, 6.6, 1.6]]) },
+    pct: { columns: 4, rows: 4, path: [["dot", 3, 3, 2.1], ["dot", 9.5, 8.5, 2.1], ["M", 10.5, 0.8], ["L", 2, 10.7], ["stroke"]] },
+    abs: { columns: 4, rows: 4, path: [["M", 6.25, 0.8], ["L", 6.25, 7.2], ["stroke"], ["M", 2.6, 4], ["L", 9.9, 4], ["stroke"],
+      ["M", 2.6, 10.4], ["L", 9.9, 10.4], ["stroke"]] },
+    open: { columns: 4, rows: 4, path: [["A", 6.25, 4.6, 3.3, 180, 360], ["L", 9.55, 7.4], ["L", 11.4, 9.1], ["L", 1.1, 9.1], ["L", 2.95, 7.4], ["Z"], ["fill"],
+      ["dot", 6.25, 10.3, 1.3], ["dot", 6.25, 1.1, 0.9]] },
+  };
+
+  function iconSVG(name, cell, color) {
+    const shape = ICONS[name];
+    const s = cell / 3, w = shape.columns * cell - 1, h = shape.rows * cell - 1;
+    const at = (cx, cy, r, deg) => `${(cx + r * Math.cos(deg * Math.PI / 180)).toFixed(3)} ${(cy + r * Math.sin(deg * Math.PI / 180)).toFixed(3)}`;
+    let d = "", out = "";
+    for (const o of shape.path) {
+      if (o[0] === "M" || o[0] === "L") d += `${o[0]}${o[1]} ${o[2]}`;
+      else if (o[0] === "A") {
+        const [, cx, cy, r, a0, a1] = o;
+        d += `M${at(cx, cy, r, a0)}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(cx, cy, r, a1)}`;
+      } else if (o[0] === "Z") d += "Z";
+      else if (o[0] === "dot") out += `<circle cx="${o[1]}" cy="${o[2]}" r="${o[3]}" fill="${color}"/>`;
+      else {
+        if (o[0] === "stroke") out += `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+        else out += `<path d="${d}" fill="${color}"${o[0] === "hollow" ? ` fill-rule="evenodd"` : ""}/>`;
+        d = "";
+      }
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${(w / s).toFixed(2)} ${(h / s).toFixed(2)}" aria-hidden="true">${out}</svg>`;
+  }
+
   function fit(canvas) {
     const r = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -164,24 +208,46 @@ window.Cells = (() => {
     return { ctx, w, h };
   }
 
-  function normFor(pts, base) {
+  // `room` is the share of the range kept clear above and below the line.
+  function normFor(pts, base, room = 0.08) {
     let lo = base, hi = base;
     for (const p of pts) { lo = Math.min(lo, p.v); hi = Math.max(hi, p.v); }
-    const pad = (hi - lo) * 0.08 || 1;
+    const pad = (hi - lo) * room || 1;
     lo -= pad; hi += pad;
     return (value) => (hi - value) / (hi - lo);
   }
 
+  // A range's high and low marked on the chart, as Stonks' RangeMarks: the
+  // price, then its date, over the high and under the low, running from
+  // the point toward the chart's middle. `at(i, v)` is where value v sits
+  // at print i: a mark's value can be today's low or high, not a print.
+  function drawMarks(ctx, w, h, marks, at) {
+    ctx.save();
+    ctx.font = `12px ${v("--mono")}`;
+    for (const m of marks) {
+      const { x, top, bottom } = at(m.i, m.v);
+      const value = `${m.value} `;
+      const width = ctx.measureText(value + m.date).width;
+      const left = Math.max(0, Math.min(w - width, x > w / 2 ? x - width : x));
+      const y = m.low ? Math.min(h - 2, bottom + 15) : Math.max(11, top - 6);
+      ctx.fillStyle = COL.fg;
+      ctx.fillText(value, left, y);
+      ctx.fillStyle = COL.muted;
+      ctx.fillText(m.date, left + ctx.measureText(value).width, y);
+    }
+    ctx.restore();
+  }
+
   // The retro chart, as Stonks' PixelChart draws it: a faint grid, the
   // baseline as every other cell, a stem from each cap to the baseline at
-  // the wash's alpha, the cap at full colour; extended hours dimmer.
+  // the wash's alpha, the cap at full color; extended hours dimmer.
   // `o.scale` is the points' value range when it must hold still while
-  // the points fill in.
+  // the points fill in. Returns the grid it drew, which the chimes play.
   function drawRetro(ctx, w, h, pts, base, o) {
     const pixel = o.pixel, gap = o.gap, pitch = pixel + gap;
     const cols = Math.max(1, Math.floor(w / pitch));
     const rows = Math.max(1, Math.floor(h / pixel));
-    const norm = normFor(o.scale || pts, base);
+    const norm = normFor((o.scale || pts).concat(o.marks || []), base, o.marks ? 0.2 : 0.08);
     const baseRow = Math.round(norm(base) * (rows - 1));
     const baseY = baseRow * pixel;
     if (o.ghost) {
@@ -203,6 +269,8 @@ window.Cells = (() => {
       levels[c] = Math.round(norm(p.v) * (rows - 1));
       ext[c] = !!p.ext;
     }
+    // A column shows its last print, but a marked high or low print shows itself.
+    for (const m of o.marks || []) if (pts[m.i].v === m.v) levels[colOf(pts[m.i])] = Math.round(norm(m.v) * (rows - 1));
     const reveal = o.reveal == null || o.reveal >= 1 ? cols : Math.ceil(cols * o.reveal);
     const stem = o.stem || 0.35;
     for (let c = 0; c < reveal; c++) {
@@ -230,14 +298,22 @@ window.Cells = (() => {
       ctx.fillStyle = COL.fg;
       ctx.fillRect(c * pitch, levels[c] * pixel, pixel, pixel);
     }
+    if (o.marks && reveal >= cols) {
+      drawMarks(ctx, w, h, o.marks, (i, value) => {
+        const row = Math.round(norm(value) * (rows - 1));
+        return { x: colOf(pts[i]) * pitch + pixel / 2, top: row * pixel, bottom: (row + 1) * pixel };
+      });
+    }
+    return { retro: true, grid: { columns: cols, rows, levels, baseRow } };
   }
 
-  // The smooth chart: one line in the day's colours either side of the
+  // The smooth chart: one line in the day's colors either side of the
   // baseline, a wash under it, a dashed baseline; extended hours dimmer.
+  // Returns its points' heights, 0 at the top, which the chimes play.
   function drawSmooth(ctx, w, h, pts, base, o) {
     if (!pts.length) return;
     const pad = o.pad == null ? 6 : o.pad;
-    const norm = normFor(o.scale || pts, base);
+    const norm = normFor((o.scale || pts).concat(o.marks || []), base, o.marks ? 0.2 : 0.08);
     const X = (x) => 1 + x * (w - 2);
     const Y = (value) => pad + norm(value) * (h - 2 * pad);
     const by = Math.round(Y(base)) + 0.5;
@@ -297,6 +373,8 @@ window.Cells = (() => {
       const p = pts[o.lastCap];
       dot(p, 4, p.v >= base ? COL.up : COL.down);
     }
+    if (o.marks && clipW >= w) drawMarks(ctx, w, h, o.marks, (i, value) => ({ x: X(pts[i].x), top: Y(value), bottom: Y(value) }));
+    return { retro: false, geometry: { points: pts.map((p) => ({ x: p.x, y: norm(p.v) })) } };
   }
 
   // A thin rule: dotted cells in retro, a line in smooth.
@@ -320,7 +398,7 @@ window.Cells = (() => {
   }
 
   return {
-    COL, rgba, blockCells, blocksSVG, spriteSVG, sprite, SLEEP_Z, BULL, BEAR, markSVG,
+    COL, rgba, blockCells, blocksSVG, spriteSVG, sprite, SLEEP_Z, REMOVE, BULL, BEAR, markSVG, iconSVG,
     fit, drawRetro, drawSmooth, drawRule,
   };
 })();

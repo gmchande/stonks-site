@@ -1,19 +1,22 @@
 # Stonks
 
-> Stonks is a free stock ticker and watchlist for the Omarchy 4 bar. A small pill shows how a stock is doing today, and a click opens its chart, with your lists under it.
+> Stonks is a free stock watchlist for the Omarchy 4 bar. A small pill shows how one stock is doing today. Click it for the chart and your lists.
 
-- Install: `omarchy plugin add https://github.com/gmchande/omarchy-stonks.git --enable`. It needs Omarchy 4, which asks you to confirm, then where in the bar to put the pill.
-- Cost: free and open source, under the MIT licence.
+- Install: `omarchy plugin add https://github.com/gmchande/omarchy-stonks.git --enable`. You need Omarchy 4. It asks you to confirm, then where to put the pill in the bar.
+- Cost: free and open source, under the MIT license.
 - Account: none, and no API key.
-- Markets: stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, each in its own currency. Stonks never converts currencies.
-- Sessions: a smaller line under the price shows the pre-market, after-hours, or overnight price. Overnight prices are for the US stocks and ETFs that Robinhood trades overnight.
-- Prices: quotes, charts, and search come from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo delays many exchanges' quotes by up to 30 minutes, London's and Tokyo's among them, and Stonks marks an old price with "As of" and its time.
-- Looks: smooth or retro (block digits and pixel columns), in the Omarchy theme's colours, light themes too.
-- Updates: never by itself. Once a day it checks for a newer version, and the footer says when one is out.
-- It doesn't track holdings, send price alerts, or convert currencies, and it isn't investment advice.
+- Markets: stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it.
+- Sessions: a smaller line under the price shows the pre-market, after-hours, or overnight price. Overnight prices cover the US stocks and ETFs that trade overnight on Robinhood. Until the next session opens, the day's chart shows the last session, then the night and the pre-market.
+- Prices: quotes, charts, and search come from Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo sends some exchanges' prices late, and Stonks marks an old price with "As of" and its time.
+- Looks: Stonks opens in retro, with block digits and pixel columns. Smooth uses plain digits and a line chart. Both use the Omarchy theme's colors, on light themes too. If its green and red are missing, too alike, or too faint, Stonks uses its own.
+- Sounds: off until you turn them on with the speaker at the top right, or m. Then adding or removing a row makes a short sound. Taking a screenshot makes a shutter sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at.
+- Screenshots: the camera at the top right, or Ctrl+C, makes a picture of the chart sized so X shows it whole. Stonks saves it with Omarchy's own screenshots and copies it to the clipboard.
+- Updates: never by itself. Once a day it checks for a new version, and the footer offers it.
+- It doesn't track your holdings or send price alerts. It never converts prices, and it isn't investment advice.
 
 ## Links
 
 - [Website](https://getstonks.app/)
 - [Source and README](https://github.com/gmchande/omarchy-stonks): every feature, key, and limit
+- [Omarchy plugin marketplace](https://plugins.omarchy.org/plugin.html?id=grvc.stonks)
 - [Report a bug](https://github.com/gmchande/omarchy-stonks/issues/new?template=bug.yml)
