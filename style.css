@@ -267,6 +267,7 @@ button { font: inherit; color: inherit; }
 .row .who { min-width: 0; }
 .row .sym { display: inline-block; color: var(--fg); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; }
 .row .name { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row[aria-current="true"] .name { color: var(--text); } /* --muted reads at 3.8:1 on --raise */
 .row .nums { text-align: right; font-size: 14px; line-height: 1.35; }
 .row .nums span { display: block; color: var(--fg); }
 .row canvas { width: 72px; height: 24px; display: block; }
