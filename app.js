@@ -6,6 +6,8 @@
   const { COL, rgba } = Cells;
   const { money } = Market;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  // Safari on a phone draws :active only once a page listens for touches.
+  document.addEventListener("touchstart", () => {}, { passive: true });
   const HERO_CLOCK = 14 * 60 + 45;
 
   const tone = (n) => (n > 0.004 ? "up" : n < -0.004 ? "down" : "");
@@ -298,7 +300,7 @@
           if (!slot) return;
           const i = [...el.rows.children].indexOf(slot);
           if (e.target.closest(".x")) this.remove(i);
-          else { this.sel = i; this.setSymbol(i); }
+          else { this.sel = i; this.setSymbol(i); el.rows.classList.remove("calm"); }
         });
         el.rows.addEventListener("focusin", (e) => {
           const i = [...el.rows.children].indexOf(e.target.closest(".row-slot"));
