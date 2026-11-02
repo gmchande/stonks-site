@@ -30,7 +30,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-padding-top: 56px; }
+html { scroll-padding-top: 56px; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
 body {
@@ -42,7 +42,7 @@ body {
 }
 
 a { color: var(--fg); text-decoration-color: var(--faint); text-underline-offset: 3px; }
-a:hover { text-decoration-color: var(--accent); }
+@media (hover: hover) { a:hover { text-decoration-color: var(--accent); } }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 code { font-family: var(--mono); color: var(--fg); font-size: 0.92em; overflow-wrap: anywhere; }
 kbd {
@@ -58,7 +58,10 @@ kbd {
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .nw { white-space: nowrap; }
-button { font: inherit; color: inherit; }
+button { font: inherit; color: inherit; -webkit-user-select: none; user-select: none; }
+button, a { touch-action: manipulation; }
+/* What a press looks like on a screen with no pointer to hover with. */
+button:not(:disabled):active, a:active { opacity: 0.7; }
 
 /* Block cells: each lit cell a pixel short of the next, unlit slots faint. */
 .blocks { display: inline-block; line-height: 0; }
@@ -89,13 +92,13 @@ button { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--fg); text-decoration: none; font-weight: 700; }
 .topbar nav { display: flex; align-items: center; gap: 20px; }
 .topbar nav a:not(.btn) { text-decoration: none; color: var(--text); }
-.topbar nav a:not(.btn):hover { color: var(--fg); }
+@media (hover: hover) { .topbar nav a:not(.btn):hover { color: var(--fg); } }
 .mark svg { display: block; }
 .speaker {
   display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 4px;
   border: 0; background: none; color: var(--text); cursor: pointer; letter-spacing: inherit; font-size: 13px;
 }
-.speaker:hover { color: var(--fg); }
+@media (hover: hover) { .speaker:hover { color: var(--fg); } }
 .speaker-icon { display: block; width: 17px; height: 11px; }
 .speaker-icon svg { display: block; }
 .speaker[data-state="off"] .speaker-word { text-decoration: line-through; text-decoration-color: var(--faint); }
@@ -141,10 +144,10 @@ button { font: inherit; color: inherit; }
   border: 1px solid var(--line); background: var(--surface); color: var(--fg);
   padding: 2px 12px; font-size: 12px; letter-spacing: 0.1em; cursor: pointer;
 }
-.copy:hover { border-color: var(--accent); }
+@media (hover: hover) { .copy:hover { border-color: var(--accent); } }
 .term pre { margin: 0; padding: 14px; white-space: pre-wrap; overflow-wrap: break-word; font-size: 13px; line-height: 1.6; }
 .term code { color: var(--fg); font-size: 13px; overflow-wrap: break-word; }
-.prompt { color: var(--faint); user-select: none; }
+.prompt { color: var(--faint); -webkit-user-select: none; user-select: none; }
 .cursor { display: inline-block; width: 0.6em; height: 1.1em; margin-left: 4px; vertical-align: -0.2em; background: var(--fg); }
 @media (prefers-reduced-motion: no-preference) {
   .cursor { animation: blink 1.1s steps(1) infinite; }
@@ -168,6 +171,7 @@ button { font: inherit; color: inherit; }
   padding: 18px 20px 10px;
   box-shadow: 10px 10px 0 var(--bg-deep);
   font-size: 13px;
+  -webkit-user-select: none;
   user-select: none;
 }
 /* The invitation to hear the hero's replay, in its chart's empty bottom
@@ -204,12 +208,14 @@ button { font: inherit; color: inherit; }
 /* The header's icons, and the list's sign: each says on hover what a
    click does, under it, as the shell's tooltip does. */
 .tool { position: relative; width: 28px; height: 28px; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; display: grid; place-items: center; font-size: 13px; }
-.tool:hover { color: var(--fg); }
+@media (hover: hover) { .tool:hover { color: var(--fg); } }
 .tool svg { display: block; }
-[data-tip]:hover::after {
-  content: attr(data-tip); position: absolute; top: calc(100% + 3px); right: 0; z-index: 4;
-  padding: 3px 8px; background: var(--surface); border: 1px solid var(--line); color: var(--fg);
-  font-size: 12px; letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none;
+@media (hover: hover) {
+  [data-tip]:hover::after {
+    content: attr(data-tip); position: absolute; top: calc(100% + 3px); right: 0; z-index: 4;
+    padding: 3px 8px; background: var(--surface); border: 1px solid var(--line); color: var(--fg);
+    font-size: 12px; letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none;
+  }
 }
 .toast {
   position: absolute; top: calc(100% + 6px); right: 0; z-index: 3; margin: 0; max-width: 280px;
@@ -217,7 +223,7 @@ button { font: inherit; color: inherit; }
   color: var(--fg); font-size: 12px; line-height: 1.5;
 }
 .toast[hidden] { display: none; }
-.pop-head:has(.toast:not([hidden])) [data-tip]:hover::after { display: none; }
+@media (hover: hover) { .pop-head:has(.toast:not([hidden])) [data-tip]:hover::after { display: none; } }
 @media (prefers-reduced-motion: no-preference) {
   .popup.flash::before { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: 6px; background: var(--fg); pointer-events: none; animation: flash 260ms ease-out forwards; }
 }
@@ -242,7 +248,7 @@ button { font: inherit; color: inherit; }
   border: 0; background: none; padding: 3px 7px; cursor: pointer;
   color: var(--muted); font-size: 12px; letter-spacing: 0.08em;
 }
-.ranges button:hover { color: var(--fg); }
+@media (hover: hover) { .ranges button:hover { color: var(--fg); } }
 .ranges button[aria-pressed="true"] { background: var(--raise); color: var(--fg); }
 .info { display: grid; grid-template-columns: auto auto minmax(24px, 1fr) auto auto auto auto auto; gap: 4px 8px; align-items: center; font-size: 12px; color: var(--muted); letter-spacing: 0.02em; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
 .info b { color: var(--fg); font-weight: 400; white-space: nowrap; }
@@ -261,7 +267,7 @@ button { font: inherit; color: inherit; }
   width: 100%; padding: 7px 12px; border: 0; border-left: 2px solid transparent;
   background: none; text-align: left; cursor: pointer;
 }
-.row:hover { background: var(--surface); }
+@media (hover: hover) { .row:hover { background: var(--surface); } }
 .row[aria-current="true"] { background: var(--raise); border-left-color: var(--fg); }
 .row.selected { outline: 1px dashed var(--faint); outline-offset: -1px; }
 .row .who { min-width: 0; }
@@ -272,18 +278,25 @@ button { font: inherit; color: inherit; }
 .row .nums span { display: block; color: var(--fg); }
 .row canvas { width: 72px; height: 24px; display: block; }
 .row .nums { font-variant-numeric: tabular-nums; }
-/* A row's ×, beside its symbol while the pointer is on the row. */
+/* A row's ×, beside its symbol while the pointer is on the row, or on a
+   touch screen while the row is the one showing. */
 .x {
   position: absolute; top: 8px; width: 18px; height: 18px; padding: 0; border: 0; background: var(--raise);
   color: var(--text); font-size: 15px; line-height: 1; cursor: pointer; display: none; place-items: center;
 }
 .x svg { display: block; }
-.x:hover { color: var(--fg); background: var(--line); }
-.row-slot:hover .x, .x:focus-visible { display: grid; }
-.rows.calm .row-slot:hover .x:not(:focus-visible) { display: none; }
+@media (hover: hover) { .x:hover { color: var(--fg); background: var(--line); } }
+.x:focus-visible { display: grid; }
+@media (hover: hover) {
+  .row-slot:hover .x { display: grid; }
+  .rows.calm .row-slot:hover .x:not(:focus-visible) { display: none; }
+}
+@media (hover: none) {
+  .rows:not(.calm) .row[aria-current="true"] + .x { display: grid; }
+}
 .pop-foot { position: relative; display: flex; justify-content: center; align-items: center; min-height: 40px; margin: 6px -4px 0; padding-top: 6px; border-top: 1px solid var(--line); }
 .pop-foot button { border: 0; background: none; padding: 4px 6px; cursor: pointer; color: var(--text); font-size: 13px; }
-.pop-foot button:hover { color: var(--fg); }
+@media (hover: hover) { .pop-foot button:hover { color: var(--fg); } }
 .pop-foot .undo { position: absolute; right: 0; color: var(--fg); }
 .pop-foot .undo[hidden] { display: none; }
 
@@ -329,7 +342,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   height: 44px; padding: 0 16px; border: 0; background: none; cursor: pointer;
   font-size: 22px; white-space: nowrap; color: var(--fg);
 }
-.pill:hover { background: var(--raise); }
+@media (hover: hover) { .pill:hover { background: var(--raise); } }
 .pill canvas { display: block; }
 .pill .arrow { display: inline-block; font-size: 22px; }
 .forms { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 10px; }
@@ -337,7 +350,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   border: 1px solid var(--line); background: var(--surface); padding: 6px 14px; cursor: pointer;
   font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text);
 }
-.forms button:hover, .chips button:hover, .seg button:hover { color: var(--fg); border-color: var(--faint); }
+@media (hover: hover) { .forms button:hover, .chips button:hover, .seg button:hover { color: var(--fg); border-color: var(--faint); } }
 .forms button[aria-pressed="true"], .chips button[aria-pressed="true"], .seg button[aria-pressed="true"] {
   border-color: var(--accent); color: var(--fg); box-shadow: inset 0 0 0 1px var(--accent);
 }
@@ -410,7 +423,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   padding: 10px 6px; border: 1px solid var(--line); border-bottom-width: 4px; background: var(--surface);
   color: var(--fg); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
 }
-.pads button:hover { border-color: var(--faint); }
+@media (hover: hover) { .pads button:hover { border-color: var(--faint); } }
 .pads button:active { transform: translateY(2px); border-bottom-width: 2px; margin-bottom: 2px; }
 .pads [data-sound="replay"] { border-color: var(--accent); }
 .sound-state { margin: 12px 0 0; min-height: 3.2em; }
@@ -455,6 +468,34 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 
 .foot { border-top: 1px solid var(--line); padding: 28px 24px 48px; text-align: center; font-size: 13px; color: var(--muted); }
 .foot p { margin: 6px 0; }
+
+/* A finger needs more room than these controls draw. Each keeps its size
+   and reaches past it, so the page looks the same and nothing moves; those
+   with room to spare just grow. Wide enough for a finger where the row has
+   the room: five icons beside a stock's name don't. */
+@media (pointer: coarse) {
+  .topbar nav, .brand { align-self: stretch; }
+  .topbar nav { align-items: stretch; }
+  .topbar nav .btn { align-self: center; }
+  .topbar nav a:not(.btn) { display: flex; align-items: center; }
+  .speaker { position: relative; height: auto; }
+  .speaker::before { content: ""; position: absolute; inset: 0 -6px; }
+  .btn-small, .copy, .animal, .change, .ranges button, .pop-foot .add { position: relative; }
+  .btn-small::before, .tool::before, .animal::before, .copy::before, .change::before, .hear::before,
+  .ranges button::before, .pop-foot button::before, .x::before, .pill::before { content: ""; position: absolute; }
+  .btn-small::before { inset: -8px 0; }
+  .copy::before { inset: -10px -6px; }
+  .tool::before, .animal::before { inset: -8px 0; }
+  .list-head .tool::before { inset: -11px -6px; }
+  .change::before { inset: -14px 0; }
+  .pill::before { inset: -3px 0; }
+  .hear::before { inset: -9px 0; }
+  .ranges button::before { inset: -10px -6px; }
+  .pop-foot button::before { inset: -8px 0; }
+  /* The × keeps to its own row, and off the symbol that selects it. */
+  .x::before { inset: -8px -13px -18px 0; }
+  .forms button, .chips button, .seg button { min-height: 44px; }
+}
 
 @media (max-width: 1020px) {
   .hero-inner { grid-template-columns: minmax(0, 1fr); gap: 56px; }
