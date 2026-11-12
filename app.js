@@ -213,7 +213,7 @@
       this.chart = null; // what the chart drew, which its chimes play
       this.chimed = -1;
       this.scrubMinute = null;
-      this.removed = []; // what "+ Add a symbol" puts back, the latest last
+      this.removed = []; // what "+ Find or add a symbol" puts back, the latest last
       this.undoable = null; // the removal Ctrl+Z undoes, until the list next changes
       this.timers = {};
       this.build();
@@ -232,7 +232,7 @@
             <button type="button" class="tool" data-sound-toggle><span class="speaker-icon" aria-hidden="true"></span></button>
             ${this.full ? tool("camera", "Take a screenshot") : ""}
             ${tool("look", "")}
-            ${this.full ? tool("help", "Show all keys", "?") : ""}
+            ${this.full ? tool("help", "Show the keys", "?") : ""}
           </span>
           ${this.full ? `<p class="toast" hidden></p>` : ""}
         </div>
@@ -248,22 +248,22 @@
         <div class="info"></div>
         <div class="list-head"><span class="list-name">ALL</span><span>TODAY</span><canvas class="breadth-rule" aria-hidden="true"></canvas>${tool("unit", "")}</div>
         <div class="rows" role="group" aria-label="Made-up watchlist"></div>
-        <div class="pop-foot"><button type="button" class="add">+ Add a symbol</button><button type="button" class="undo" hidden></button></div>
+        <div class="pop-foot"><button type="button" class="add">+ Find or add a symbol</button><button type="button" class="undo" hidden></button></div>
         <div class="sheet" hidden>
           <p class="sheet-title">KEYS · THIS DEMO</p>
           <dl>
             <dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move the selection</dd>
-            <dt><kbd>⏎</kbd></dt><dd>Show the row's chart</dd>
-            <dt><kbd>a</kbd></dt><dd>Add a symbol: here, put one back</dd>
+            <dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd>
+            <dt><kbd>a</kbd> <kbd>/</kbd></dt><dd>Find or add a symbol: here, put one back</dd>
             <dt><kbd>Del</kbd> <kbd>⌫</kbd></dt><dd>Remove the selected row</dd>
             <dt><kbd>Ctrl+Z</kbd></dt><dd>Undo a removal</dd>
-            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one step</dd>
+            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Move along the chart</dd>
             <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the range</dd>
             <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Show the change another way</dd>
-            <dt><kbd>s</kbd></dt><dd>Smooth or retro</dd>
-            <dt><kbd>m</kbd></dt><dd>Sound on or off</dd>
-            <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
+            <dt><kbd>c</kbd></dt><dd>Show the change in %, an amount or since the open</dd>
+            <dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd>
+            <dt><kbd>m</kbd></dt><dd>Turn sounds on or off</dd>
+            <dt><kbd>Esc</kbd></dt><dd>Close</dd>
           </dl>
         </div>` : ""}`;
       const $ = (sel) => r.querySelector(sel);
@@ -388,7 +388,7 @@
       el.look.innerHTML = retro ? LOOK_ICONS.toSmooth : LOOK_ICONS.toRetro();
       el.look.setAttribute("aria-label", retro ? "Switch to smooth" : "Switch to retro");
       el.look.dataset.tip = el.look.getAttribute("aria-label");
-      if (el.help) el.help.dataset.tip = el.sheet.hidden ? "Show all keys" : "Hide the keys";
+      if (el.help) el.help.dataset.tip = el.sheet.hidden ? "Show the keys" : "Hide the keys";
       if (el.camera && !this.timers.toast) el.camera.innerHTML = Cells.iconSVG("camera", 3, "currentColor");
       el.listing.innerHTML = `<b>${s.sym}</b>DEMO · USD`;
 
@@ -540,7 +540,7 @@
     }
 
     // A removal takes the row out, and for 5 seconds "Undo …" shows beside
-    // "+ Add a symbol"; Ctrl+Z undoes it until the list next changes.
+    // "+ Find or add a symbol"; Ctrl+Z undoes it until the list next changes.
     remove(i) {
       if (this.symbols.length < 2) return;
       const [s] = this.symbols.splice(i, 1);
@@ -582,7 +582,7 @@
       Sound.play(Look.retro, "undo");
       this.restore(this.undoable);
     }
-    // "+ Add a symbol" searches in Stonks; the demo's four are all it has,
+    // "+ Find or add a symbol" searches in Stonks; the demo's four are all it has,
     // so it puts back the one removed last.
     putBack() {
       const last = this.removed[this.removed.length - 1];
@@ -685,7 +685,7 @@
     toggleSheet(open) {
       if (!this.el.sheet) return;
       this.el.sheet.hidden = !(open ?? this.el.sheet.hidden);
-      this.el.help.dataset.tip = this.el.sheet.hidden ? "Show all keys" : "Hide the keys";
+      this.el.help.dataset.tip = this.el.sheet.hidden ? "Show the keys" : "Hide the keys";
     }
 
     key(e) {
@@ -712,7 +712,7 @@
       else if (k === "c") this.cycleChange();
       else if (!this.full) handled = false;
       else if (k === "[" || k === "]") this.stepRange(k === "[" ? -1 : 1);
-      else if (k === "a") this.putBack();
+      else if (k === "a" || k === "/") this.putBack();
       else if (k === "Delete" || k === "Backspace") this.remove(this.sel);
       else if (k === "ArrowUp" || k === "ArrowDown") {
         this.sel = (this.sel + (k === "ArrowUp" ? -1 : 1) + this.symbols.length) % this.symbols.length;
