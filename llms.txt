@@ -14,7 +14,7 @@
 - Screenshots: the camera at the top right makes a picture of the chart sized so X shows it whole. Stonks saves it with Omarchy's own screenshots and copies it to the clipboard.
 - Updates: never by itself. Once a day it checks for a new version, and the footer offers it.
 - Hours: each market's hours on its own clock, with the holidays and early closes of New York, Toronto, London and Tokyo.
-- Light: Stonks asks for a stock about once a minute while its market trades, less often while it's shut, and not at all while your screens are off.
+- Light: with the panel closed and 152 stocks in its list, Stonks uses about 0.1% of one core on one screen. It asks for a stock about once a minute while its market trades, less often while it's shut, and not at all while your screens are off.
 - It doesn't track your holdings, send price alerts or show news, and it isn't investment advice.
 
 ## Links
