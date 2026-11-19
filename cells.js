@@ -240,7 +240,9 @@ window.Cells = (() => {
 
   // The retro chart, as Stonks' PixelChart draws it: a faint grid, the
   // baseline as every other cell, a stem from each cap to the baseline at
-  // the wash's alpha, the cap at full color; extended hours dimmer.
+  // the wash's alpha, the cap at full color; extended hours dimmer. The
+  // columns left of `o.aside`, the share of the width the move doesn't
+  // count, draw fainter, their stems every other cell.
   // `o.scale` is the points' value range when it must hold still while
   // the points fill in. Returns the grid it drew, which the chimes play.
   function drawRetro(ctx, w, h, pts, base, o) {
@@ -273,18 +275,24 @@ window.Cells = (() => {
     for (const m of o.marks || []) if (pts[m.i].v === m.v) levels[colOf(pts[m.i])] = Math.round(norm(m.v) * (rows - 1));
     const reveal = o.reveal == null || o.reveal >= 1 ? cols : Math.ceil(cols * o.reveal);
     const stem = o.stem || 0.35;
+    const asideCols = o.aside ? Math.floor(o.aside * cols) : 0;
     for (let c = 0; c < reveal; c++) {
       const lv = levels[c];
       if (lv === undefined) continue;
       const color = lv <= baseRow ? COL.up : COL.down;
+      const aside = c < asideCols;
+      const ink = aside ? 0.4 : ext[c] ? 0.45 : 1;
       const y = lv * pixel;
       const top = Math.min(y, baseY);
       const hh = Math.abs(y - baseY);
       if (hh > 0) {
-        ctx.fillStyle = rgba(color, ext[c] ? stem * 0.45 : stem);
-        ctx.fillRect(c * pitch, top, pixel, hh);
+        ctx.fillStyle = rgba(color, stem * ink);
+        // Every other cell from the one on the baseline, so the cells line
+        // up across columns.
+        if (aside) for (let k = 1; k < Math.abs(lv - baseRow); k += 2) ctx.fillRect(c * pitch, (baseRow + k * Math.sign(lv - baseRow)) * pixel, pixel, pixel - gap);
+        else ctx.fillRect(c * pitch, top, pixel, hh);
       }
-      ctx.fillStyle = rgba(color, (o.cap || 1) * (ext[c] ? 0.45 : 1));
+      ctx.fillStyle = rgba(color, (o.cap || 1) * ink);
       ctx.fillRect(c * pitch, y, pixel, pixel);
     }
     if (o.scrub >= 0 && pts[o.scrub]) {
@@ -309,6 +317,8 @@ window.Cells = (() => {
 
   // The smooth chart: one line in the day's colors either side of the
   // baseline, a wash under it, a dashed baseline; extended hours dimmer.
+  // Left of `o.aside`, the share of the width the move doesn't count, the
+  // line draws fainter and half as thick, with no wash.
   // Returns its points' heights, 0 at the top, which the chimes play.
   function drawSmooth(ctx, w, h, pts, base, o) {
     if (!pts.length) return;
@@ -340,6 +350,7 @@ window.Cells = (() => {
       }
       runs[runs.length - 1].pts.push(p);
     });
+    const asideX = o.aside ? X(o.aside) : 0;
     for (const run of runs) {
       const line = new Path2D();
       run.pts.forEach((p, i) => (i ? line.lineTo(X(p.x), Y(p.v)) : line.moveTo(X(p.x), Y(p.v))));
@@ -349,15 +360,20 @@ window.Cells = (() => {
       area.closePath();
       const a = run.ext ? 0.45 : 1;
       for (const [color, y0, y1] of [[COL.up, 0, by], [COL.down, by, h]]) {
-        ctx.save();
-        ctx.beginPath(); ctx.rect(0, y0, clipW, y1 - y0); ctx.clip();
-        ctx.fillStyle = rgba(color, 0.16 * a);
-        ctx.fill(area);
-        ctx.strokeStyle = rgba(color, a);
-        ctx.lineWidth = o.lineWidth || 1.5;
-        ctx.lineJoin = "round"; ctx.lineCap = "round";
-        ctx.stroke(line);
-        ctx.restore();
+        for (const [x0, x1, aside] of [[0, Math.min(asideX, clipW), true], [asideX, clipW, false]]) {
+          if (x1 <= x0) continue;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+          if (!aside) {
+            ctx.fillStyle = rgba(color, 0.16 * a);
+            ctx.fill(area);
+          }
+          ctx.strokeStyle = rgba(color, aside ? 0.4 : a);
+          ctx.lineWidth = (o.lineWidth || 1.5) * (aside ? 0.5 : 1);
+          ctx.lineJoin = "round"; ctx.lineCap = "round";
+          ctx.stroke(line);
+          ctx.restore();
+        }
       }
     }
     const dot = (p, r, color) => {

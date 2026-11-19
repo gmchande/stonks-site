@@ -213,7 +213,7 @@
       this.chart = null; // what the chart drew, which its chimes play
       this.chimed = -1;
       this.scrubMinute = null;
-      this.removed = []; // what "+ Add a symbol" puts back, the latest last
+      this.removed = []; // what "+ Find or add a symbol" puts back, the latest last
       this.undoable = null; // the removal Ctrl+Z undoes, until the list next changes
       this.timers = {};
       this.build();
@@ -232,7 +232,7 @@
             <button type="button" class="tool" data-sound-toggle><span class="speaker-icon" aria-hidden="true"></span></button>
             ${this.full ? tool("camera", "Take a screenshot") : ""}
             ${tool("look", "")}
-            ${this.full ? tool("help", "Show all keys", "?") : ""}
+            ${this.full ? tool("help", "Show the keys", "?") : ""}
           </span>
           ${this.full ? `<p class="toast" hidden></p>` : ""}
         </div>
@@ -248,22 +248,19 @@
         <div class="info"></div>
         <div class="list-head"><span class="list-name">ALL</span><span>TODAY</span><canvas class="breadth-rule" aria-hidden="true"></canvas>${tool("unit", "")}</div>
         <div class="rows" role="group" aria-label="Made-up watchlist"></div>
-        <div class="pop-foot"><button type="button" class="add">+ Add a symbol</button><button type="button" class="undo" hidden></button></div>
+        <div class="pop-foot"><button type="button" class="add">+ Find or add a symbol</button><button type="button" class="undo" hidden></button></div>
         <div class="sheet" hidden>
           <p class="sheet-title">KEYS · THIS DEMO</p>
           <dl>
             <dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move the selection</dd>
-            <dt><kbd>⏎</kbd></dt><dd>Show the row's chart</dd>
-            <dt><kbd>a</kbd></dt><dd>Add a symbol: here, put one back</dd>
+            <dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd>
+            <dt><kbd>a</kbd> <kbd>/</kbd></dt><dd>Find or add a symbol: here, put one back</dd>
             <dt><kbd>Del</kbd> <kbd>⌫</kbd></dt><dd>Remove the selected row</dd>
             <dt><kbd>Ctrl+Z</kbd></dt><dd>Undo a removal</dd>
-            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Scrub one step</dd>
+            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Move along the chart</dd>
             <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the range</dd>
-            <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Show the change another way</dd>
-            <dt><kbd>s</kbd></dt><dd>Smooth or retro</dd>
-            <dt><kbd>m</kbd></dt><dd>Sound on or off</dd>
-            <dt><kbd>Esc</kbd></dt><dd>Close this sheet, then the scrub</dd>
+            <dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd>
+            <dt><kbd>Esc</kbd></dt><dd>Close</dd>
           </dl>
         </div>` : ""}`;
       const $ = (sel) => r.querySelector(sel);
@@ -319,13 +316,17 @@
     feat() { return this.symbols[this.sym]; }
     quote() { return Market.quoteAt(this.feat(), this.clock); }
 
+    // The range on show: on 1D, the day Stonks' chart draws (`Market.dayAt`).
     series() {
       const s = this.feat();
       const q = this.quote();
       const key = this.range;
-      if (key === "1D") return { s, q, key, pts: q.prints, base: s.prev, day: true };
+      if (key === "1D") {
+        const day = Market.dayAt(s, this.clock);
+        return { s, q, key, pts: day.pts, base: day.base, day };
+      }
       const pts = rangeSeries(s, key, q);
-      return { s, q, key, pts, base: pts[0].v, day: false };
+      return { s, q, key, pts, base: pts[0].v, day: null };
     }
 
     setClock(m) {
@@ -357,6 +358,10 @@
       const el = this.el;
       const scrubbed = this.scrub >= 0 && pts[this.scrub];
       this.scrubMinute = scrubbed && day ? pts[this.scrub].m : null;
+      // The close the move counts from: a scrubbed moment's, by its place in
+      // the day, or the price on top's.
+      const from = scrubbed && day ? day.closeAt(pts[this.scrub].m) : null;
+      const close = from ? from.v : day ? q.base : base;
       let shown, status;
       if (scrubbed) {
         const read = day ? Market.readingAt(pts, this.scrub, this.clock) : { v: pts[this.scrub].v, status: `At ${rangeLabel(key, pts[this.scrub])}` };
@@ -370,7 +375,7 @@
       // The animal is the direction of the moment shown against the
       // baseline; it sleeps while its market rests, and wakes for a scrub.
       // It is the pixel bull or bear in both looks, as Stonks draws it.
-      const dir = tone(((shown - base) / base) * 100);
+      const dir = tone(((shown - close) / close) * 100);
       const asleep = !scrubbed && day && q.asleep;
       el.animal.innerHTML = "";
       el.animal.disabled = !dir || !pts.length;
@@ -388,7 +393,7 @@
       el.look.innerHTML = retro ? LOOK_ICONS.toSmooth : LOOK_ICONS.toRetro();
       el.look.setAttribute("aria-label", retro ? "Switch to smooth" : "Switch to retro");
       el.look.dataset.tip = el.look.getAttribute("aria-label");
-      if (el.help) el.help.dataset.tip = el.sheet.hidden ? "Show all keys" : "Hide the keys";
+      if (el.help) el.help.dataset.tip = el.sheet.hidden ? "Show the keys" : "Hide the keys";
       if (el.camera && !this.timers.toast) el.camera.innerHTML = Cells.iconSVG("camera", 3, "currentColor");
       el.listing.innerHTML = `<b>${s.sym}</b>DEMO · USD`;
 
@@ -398,21 +403,18 @@
         : `<span class="smooth-price">${priceText}</span>`;
 
       // On a longer range the price's change is the range's; the rows stay
-      // on the day's move.
+      // on the day's move. A move in money names its currency.
       if (this.changeMode === 2 && q.open === null && !this.full) this.changeMode = 0;
       const mode = day ? this.changeMode : 0;
-      const move = this.moved(shown, base, day ? q.open : null, mode);
-      el.change.textContent = signed(move.n, retro, move.pct ? "%" : "");
+      const sinceOpen = mode === 2 && q.open !== null;
+      const move = this.moved(shown, close, day ? q.open : null, mode);
+      const inUnit = (m) => signed(m.n, retro, m.pct ? "%" : " USD");
+      el.change.textContent = inUnit(move);
       el.change.className = `change ${tone(move.n) || "flat"}`;
       el.change.disabled = !day;
       el.change.setAttribute("aria-label", `${el.change.textContent}. ${day ? "Show the day's change as a percent or an amount, or since the open." : ""}`);
 
-      const ext = !scrubbed && day ? q.ext : null;
-      if (ext) {
-        const extDelta = mode === 1 ? ext.v - q.price : ext.pct;
-        el.ext.innerHTML = `${ext.label} <b>${money(ext.v)}</b> <span class="${tone(ext.pct) || "flat"}">${signed(extDelta, retro, mode === 1 ? "" : "%")}</span>`;
-      } else el.ext.textContent = "";
-      el.cap.textContent = !day ? key : mode === 2 && q.open !== null ? "SINCE OPEN" : !scrubbed ? q.caption : "";
+      this.renderLines({ q, key, day, from, shown, close, scrubbed, mode, sinceOpen, move, inUnit });
 
       this.drawChart({ s, q, pts, base, day, key });
 
@@ -425,8 +427,38 @@
       const i = scrubbed ? this.scrub : pts.length - 1;
       el.chart.setAttribute("aria-label", `${day ? "The day's chart" : `The ${key} chart`}, made-up prices. Left and right arrows scrub.`);
       el.chart.setAttribute("aria-valuenow", String(Math.round((Math.max(0, i) / Math.max(1, pts.length - 1)) * 100)));
-      el.chart.setAttribute("aria-valuetext", `${status}, ${priceText}, ${signed(((shown - base) / base) * 100, false, "%")}`);
+      el.chart.setAttribute("aria-valuetext", `${status}, ${priceText}, ${signed(((shown - close) / close) * 100, false, "%")}`);
       this.onRender && this.onRender();
+    }
+
+    // The line under the price and the one under the move, as Stonks' panel
+    // has them. Under the price, the close the move counts from, by its
+    // day's name, with that day's move while the price on top is a trade
+    // since, and a whole day's after hours as long as there's room; while
+    // scrubbed, the close the moment counts from, or the open. Under the
+    // move, its name and the same move in the other unit; a scrubbed moment
+    // keeps only a range's name.
+    renderLines({ q, key, day, from, shown, close, scrubbed, mode, sinceOpen, move, inUnit }) {
+      const el = this.el;
+      const retro = Look.retro;
+      const moveOf = (to, at) => {
+        const pct = ((to - at) / at) * 100;
+        return `<span class="${tone(pct) || "flat"}">${mode === 1 ? signed(to - at, retro, "") : signed(pct, retro, "%")}</span>`;
+      };
+      if (scrubbed && day) el.ext.textContent = sinceOpen ? `OPEN ${money(q.open)}` : `┄ ${from.label} ${money(from.v)}`;
+      else if (scrubbed) el.ext.textContent = "";
+      else {
+        const c = q.close;
+        el.ext.innerHTML = `${c.label} <b>${money(c.v)}</b>${c.from === null ? "" : ` ${moveOf(c.v, c.from)}`}`
+          + (day && c.since && money(q.price) !== money(c.v) ? `<span class="since"> · AFTER HOURS ${moveOf(q.price, c.v)}</span>` : "");
+      }
+      const at = sinceOpen ? q.open : close;
+      const other = move.pct ? { n: shown - at, pct: false } : { n: ((shown - close) / close) * 100, pct: true };
+      const name = scrubbed ? (day ? "" : key) : !day ? key : sinceOpen ? "SINCE OPEN" : q.name;
+      el.cap.innerHTML = `${name ? `${name} ` : ""}<span class="${tone(move.pct ? move.n : other.n) || "flat"}">${inUnit(other)}</span>`;
+      // The part since the close goes whole or not at all, and first.
+      const since = el.ext.querySelector(".since");
+      if (since && el.ext.scrollWidth > el.ext.clientWidth) since.remove();
     }
 
     drawChart({ s, q, pts, base, day, key }) {
@@ -435,9 +467,10 @@
       const o = {
         scrub: this.scrub,
         reveal: this.reveal,
-        lastCap: day && this.scrub < 0 ? q.lastRegular : -1,
-        ticks: day ? Market.BELLS : [],
-        scale: day && this.holdScale ? s.prints : null,
+        lastCap: day && this.scrub < 0 ? day.lastCap : -1,
+        ticks: day ? day.ticks : [],
+        aside: day ? day.aside : 0,
+        scale: day && this.holdScale ? day.scale : null,
         marks: day ? null : [mark(pts.hiI, pts.hi, false), mark(pts.loI, pts.lo, true)],
       };
       this.chart = Look.retro
@@ -486,7 +519,7 @@
       const q = Market.quoteAt(s, this.clock);
       if (this.scrubMinute === null) return q;
       const v = Market.priceAt(q.prints, s.prev, this.scrubMinute);
-      return { prints: q.prints, price: v, open: q.open, pct: ((v - s.prev) / s.prev) * 100 };
+      return { price: v, base: s.prev, open: q.open, pct: ((v - s.prev) / s.prev) * 100 };
     }
 
     renderRows() {
@@ -498,13 +531,15 @@
         row.setAttribute("aria-current", String(i === this.sym));
         row.classList.toggle("selected", i === this.sel && i !== this.sym);
         const nums = row.querySelector(".nums");
-        const move = this.moved(q.price, s.prev, q.open, this.changeMode);
+        const move = this.moved(q.price, q.base, q.open, this.changeMode);
         nums.firstElementChild.textContent = money(q.price);
         nums.lastElementChild.textContent = signed(move.n, retro, move.pct ? "%" : "");
         nums.lastElementChild.className = tone(move.n) || "flat";
         const { ctx, w, h } = Cells.fit(row.querySelector("canvas"));
-        if (retro) Cells.drawRetro(ctx, w, h, q.prints, s.prev, { pixel: 2, gap: 1, scrub: -1, scale: s.prints });
-        else Cells.drawSmooth(ctx, w, h, q.prints, s.prev, { pad: 2, scrub: -1, lineWidth: 1.2, scale: s.prints });
+        const day = Market.dayAt(s, this.clock);
+        const o = { scrub: -1, scale: day.scale, aside: day.aside };
+        if (retro) Cells.drawRetro(ctx, w, h, day.pts, day.base, { ...o, pixel: 2, gap: 1 });
+        else Cells.drawSmooth(ctx, w, h, day.pts, day.base, { ...o, pad: 2, lineWidth: 1.2 });
         // The × sits beside the symbol: a pixel × in retro, the sign in smooth.
         const x = slot.querySelector(".x");
         if (x) {
@@ -540,7 +575,7 @@
     }
 
     // A removal takes the row out, and for 5 seconds "Undo …" shows beside
-    // "+ Add a symbol"; Ctrl+Z undoes it until the list next changes.
+    // "+ Find or add a symbol"; Ctrl+Z undoes it until the list next changes.
     remove(i) {
       if (this.symbols.length < 2) return;
       const [s] = this.symbols.splice(i, 1);
@@ -582,7 +617,7 @@
       Sound.play(Look.retro, "undo");
       this.restore(this.undoable);
     }
-    // "+ Add a symbol" searches in Stonks; the demo's four are all it has,
+    // "+ Find or add a symbol" searches in Stonks; the demo's four are all it has,
     // so it puts back the one removed last.
     putBack() {
       const last = this.removed[this.removed.length - 1];
@@ -685,7 +720,7 @@
     toggleSheet(open) {
       if (!this.el.sheet) return;
       this.el.sheet.hidden = !(open ?? this.el.sheet.hidden);
-      this.el.help.dataset.tip = this.el.sheet.hidden ? "Show all keys" : "Hide the keys";
+      this.el.help.dataset.tip = this.el.sheet.hidden ? "Show the keys" : "Hide the keys";
     }
 
     key(e) {
@@ -708,11 +743,9 @@
         // h and l scrub too, as in Stonks' panel.
         const from = this.scrub >= 0 ? this.scrub : pts.length - 1;
         this.scrubTo(Math.max(0, Math.min(pts.length - 1, from + (k === "ArrowLeft" || k === "h" ? -1 : 1))), true);
-      } else if (k === "p") this.replay();
-      else if (k === "c") this.cycleChange();
-      else if (!this.full) handled = false;
+      } else if (!this.full) handled = false;
       else if (k === "[" || k === "]") this.stepRange(k === "[" ? -1 : 1);
-      else if (k === "a") this.putBack();
+      else if (k === "a" || k === "/") this.putBack();
       else if (k === "Delete" || k === "Backspace") this.remove(this.sel);
       else if (k === "ArrowUp" || k === "ArrowDown") {
         this.sel = (this.sel + (k === "ArrowUp" ? -1 : 1) + this.symbols.length) % this.symbols.length;
@@ -834,8 +867,9 @@
     if (form === "sparkline") {
       pill.innerHTML = `<canvas aria-hidden="true" style="width:${small ? 39 : 51}px;height:${small ? 16 : 22}px"></canvas>${sym}${change}`;
       const { ctx, w, h } = Cells.fit(pill.querySelector("canvas"));
-      if (Look.retro) Cells.drawRetro(ctx, w, h, q.prints, s.prev, { pixel: small ? 2 : 3, gap: 1, scrub: -1 });
-      else Cells.drawSmooth(ctx, w, h, q.prints, s.prev, { pad: 2, scrub: -1, lineWidth: 1.5 });
+      const day = Market.dayAt(s, HERO_CLOCK);
+      if (Look.retro) Cells.drawRetro(ctx, w, h, day.pts, day.base, { pixel: small ? 2 : 3, gap: 1, scrub: -1, aside: day.aside });
+      else Cells.drawSmooth(ctx, w, h, day.pts, day.base, { pad: 2, scrub: -1, lineWidth: 1.5, aside: day.aside });
     } else if (form === "arrow") {
       const angle = Math.min(45, (Math.abs(q.pct) / 5) * 45) * Math.sign(q.pct);
       pill.innerHTML = `<span class="arrow ${t}" aria-hidden="true" style="transform:rotate(${-angle}deg)">➜</span>${sym}${change}`;
@@ -933,7 +967,6 @@
       unlight = setTimeout(() => row.classList.remove("lit"), 1600);
     }
     if (key === "s") Look.toggle();
-    if (key === "m") Sound.toggle(Look.retro, joining());
   });
 
   // ---- The speakers: the bar's and each panel's say whether sound is on,
@@ -997,17 +1030,17 @@
   // sound on a pad of its own, in the page's look's voice.
 
   const strip = document.querySelector("#sound .chimes");
-  const stripDay = Market.SYMBOLS[0];
-  const stripPts = stripDay.prints;
+  const stripDay = Market.dayAt(Market.SYMBOLS[0], WHOLE_DAY);
+  const stripPts = stripDay.pts;
   const soundState = document.querySelector(".sound-state");
   let stripScrub = -1, stripReveal = 1, stripChart = null, stripChimed = -1, stopStrip = null;
 
   function drawStrip() {
     const { ctx, w, h } = Cells.fit(strip);
-    const o = { scrub: stripScrub, reveal: stripReveal, ticks: Market.BELLS };
+    const o = { scrub: stripScrub, reveal: stripReveal, ticks: stripDay.ticks };
     stripChart = Look.retro
-      ? Cells.drawRetro(ctx, w, h, stripPts, stripDay.prev, { ...o, pixel: 6, gap: 1, ghost: 0.035 })
-      : Cells.drawSmooth(ctx, w, h, stripPts, stripDay.prev, o);
+      ? Cells.drawRetro(ctx, w, h, stripPts, stripDay.base, { ...o, pixel: 6, gap: 1, ghost: 0.035 })
+      : Cells.drawSmooth(ctx, w, h, stripPts, stripDay.base, o);
     const p = stripPts[stripScrub >= 0 ? stripScrub : stripPts.length - 1];
     strip.setAttribute("aria-valuenow", String(Math.round(p.x * 100)));
     strip.setAttribute("aria-valuetext", `${Market.hhmm(p.m)}, ${money(p.v)}`);
@@ -1053,9 +1086,9 @@
   });
 
   function paintSoundState() {
-    if (!Sound.on) soundState.textContent = "Sound is off. Press m, or click the speaker, to turn it on.";
+    if (!Sound.on) soundState.textContent = "Sound is off. Click the speaker to turn it on.";
     else if (!Sound.heard) soundState.textContent = "Sound is on. It starts with your first click or key on this page.";
-    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s to hear the other look, or m to turn sound off.`;
+    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s to hear the other look.`;
   }
   Sound.onChange(paintSoundState);
   Look.on(() => { stripTo(-1); paintSoundState(); });
