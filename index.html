@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stonks: a stock ticker and watchlist for the Omarchy bar</title>
-<meta name="description" content="Stonks puts your stocks in the Omarchy bar. A small pill shows how one is doing today. Click it for the chart and your lists. Free, with no account or API key.">
+<meta name="description" content="Stonks puts your stocks in the Omarchy bar, each price as it traded: in its own currency, on its exchange's clock, and overnight for US stocks. Free, no API key.">
 <link rel="canonical" href="https://getstonks.app/">
 <meta name="theme-color" content="#13141c">
 <!-- PNGs, not an SVG: a tab draws 16 or 32 px, where only whole-pixel cells stay crisp.
@@ -17,7 +17,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Stonks">
 <meta property="og:title" content="Stonks: a stock ticker and watchlist for the Omarchy bar">
-<meta property="og:description" content="A small pill in your Omarchy bar shows how a stock is doing today. Click it for the chart and your lists. Free, with no account or API key.">
+<meta property="og:description" content="Your stocks in the Omarchy bar, each price as it traded, in its own currency and on its exchange's clock. Free, with no account or API key.">
 <meta property="og:url" content="https://getstonks.app/">
 <meta property="og:image" content="https://getstonks.app/share.png">
 <meta property="og:image:width" content="1200">
@@ -25,7 +25,7 @@
 <meta property="og:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Stonks: a stock ticker and watchlist for the Omarchy bar">
-<meta name="twitter:description" content="A small pill in your Omarchy bar shows how a stock is doing today. Click it for the chart and your lists. Free, with no account or API key.">
+<meta name="twitter:description" content="Your stocks in the Omarchy bar, each price as it traded, in its own currency and on its exchange's clock. Free, with no account or API key.">
 <meta name="twitter:image" content="https://getstonks.app/share.png">
 <meta name="twitter:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
 
@@ -49,7 +49,7 @@
   "name": "Stonks",
   "url": "https://getstonks.app/",
   "image": "https://getstonks.app/share.png",
-  "description": "Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today. Click it for the chart and your lists.",
+  "description": "Stonks is a free stock watchlist for the Omarchy bar that shows each price as it traded, in its own currency and its exchange's own time. A small pill shows how one stock is doing today. Click it for the chart and your lists.",
   "applicationCategory": "FinanceApplication",
   "applicationSubCategory": "Omarchy shell plugin",
   "operatingSystem": "Linux (Omarchy 4)",
@@ -72,21 +72,21 @@
   "@type": "FAQPage",
   "mainEntity": [
     { "@type": "Question", "name": "What is Stonks?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today. Click it for the chart and your lists." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Stonks is a free stock watchlist for the Omarchy bar that shows each price as it traded, in its own currency and its exchange's own time. A small pill shows how one stock is doing today. Click it for the chart and your lists." } },
     { "@type": "Question", "name": "How do I install a stock ticker on Omarchy?",
       "acceptedAnswer": { "@type": "Answer", "text": "Install Stonks with one command: omarchy plugin add https://github.com/gmchande/omarchy-stonks.git --enable. It's made for Omarchy 4.5 and runs back to 4.0.6. It asks you to confirm, then where to put the pill in the bar." } },
     { "@type": "Question", "name": "Does Stonks need an account or an API key?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks works without either." } },
     { "@type": "Question", "name": "Where do Stonks' prices come from?",
-      "acceptedAnswer": { "@type": "Answer", "text": "From Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo sends some exchanges' prices late, so Stonks marks an old price with \"As of\" and its time." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "From Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Stonks shows each price as it came, in its listing's own currency and its exchange's own time. Yahoo sends some exchanges' prices late, so a price more than two minutes old while its market trades says \"As of\" and its time." } },
     { "@type": "Question", "name": "Does Stonks show pre-market, after-hours, and overnight prices?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. For a US stock, the large price is its newest trade, in the pre-market, after hours, or overnight for the US stocks and ETFs Robinhood trades at night. Elsewhere, a line under the price shows the pre-market or after-hours price. Through the night, until about 04:00, the day's chart keeps the day just closed with tonight's trades at its end, and the pill keeps the day's move." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. For a US stock, the large price is its newest trade, in the pre-market, after hours, or overnight for the US stocks and ETFs Robinhood trades at night. Elsewhere, a line under the price shows the pre-market or after-hours price. Through the night, until about 04:00, the pill and your rows keep the day's move." } },
     { "@type": "Question", "name": "Which markets does Stonks follow?",
       "acceptedAnswer": { "@type": "Answer", "text": "Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it." } },
     { "@type": "Question", "name": "Does Stonks make sounds?",
       "acceptedAnswer": { "@type": "Answer", "text": "Only if you turn them on: click the speaker at the top right, or press m. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at." } },
-    { "@type": "Question", "name": "Does Stonks track my portfolio or send price alerts?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings or send price alerts." } },
+    { "@type": "Question", "name": "Does Stonks track my portfolio, send price alerts, or show news?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings, send price alerts, or show news." } },
     { "@type": "Question", "name": "What does Stonks cost?",
       "acceptedAnswer": { "@type": "Answer", "text": "Nothing. Stonks is free and open source, under the MIT license." } }
   ]
@@ -116,8 +116,8 @@
     <div class="hero-copy">
       <p class="eyebrow">A plugin for Omarchy</p>
       <h1 class="wordmark"><span class="blocks" data-text="STONKS" data-cell="16" aria-hidden="true"></span><span class="sr">Stonks</span></h1>
-      <p class="lead">Your stocks in the bar. A chart a click away.</p>
-      <p class="answer">Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today. Click it for the chart and your lists. It follows stocks, ETFs, indexes, and crypto, and needs no account or API key.</p>
+      <p class="lead">Your stocks in the bar, each price as it traded.</p>
+      <p class="answer">Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today. Click it for the chart and your lists. Every price is the one Yahoo or Robinhood sent, in its own currency and on its exchange's clock, with its time when it's late. It follows stocks, ETFs, indexes, and crypto, before the open, after the close, and through the night for the US stocks that trade then, with no account or API key.</p>
       <div class="term" data-copy>
         <div class="term-bar"><span>INSTALL</span><button type="button" class="copy">Copy</button></div>
         <pre><code><span class="prompt" aria-hidden="true">$ </span>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span><span class="cursor" aria-hidden="true"></span></code></pre>
@@ -227,17 +227,18 @@
   <h2>What's in the cartridge.</h2>
   <div class="cart">
     <ul class="label-list">
-      <li>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, with charts from one day to all time.</li>
-      <li>Pre-market, after-hours, and overnight prices, and when the market opens or closes.</li>
       <li>Prices as Yahoo and Robinhood send them, in each listing's own currency and its exchange's own time.</li>
+      <li>A price more than two minutes old while its market trades says "As of" and its time. A "!" on the pill means a refresh failed or is late.</li>
+      <li>Pre-market and after-hours prices, and overnight prices for the US stocks and ETFs that trade at night.</li>
+      <li>The market's hours on its own clock, with the holidays and early closes of New York, Toronto, London, and Tokyo.</li>
+      <li>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo, with charts from one day to all time.</li>
       <li>The 52-week low and high, the market cap, and the P/E.</li>
       <li>A tiled window too, with the panel's chart and rows at the window's width.</li>
-      <li>An old price says "As of" and its time. A "!" on the pill means a refresh failed or is late.</li>
-      <li>Light on your computer: Stonks fetches nothing while every screen is off, and fetches each stock only as often as its market moves.</li>
+      <li>Light on your computer: Stonks asks for a stock about once a minute while its market trades, less often while it's shut, and not at all while your screens are off.</li>
     </ul>
     <div class="not-label">
       <p class="not-title">NOT IN THE CARTRIDGE</p>
-      <p>Stonks doesn't track your holdings or send price alerts. It never converts prices.</p>
+      <p>Stonks doesn't track your holdings, send price alerts, or show news. It never converts a price, since a converted price is one nobody traded at.</p>
     </div>
   </div>
 </section>
@@ -341,14 +342,14 @@
   <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="10" data-cell="6" aria-hidden="true"></span><span class="sr">10</span></p>
   <h2>Asked and answered.</h2>
   <div class="faq">
-    <section class="qa"><h3>What is Stonks?</h3><p>Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today. Click it for the chart and your lists.</p></section>
+    <section class="qa"><h3>What is Stonks?</h3><p>Stonks is a free stock watchlist for the Omarchy bar that shows each price as it traded, in its own currency and its exchange's own time. A small pill shows how one stock is doing today. Click it for the chart and your lists.</p></section>
     <section class="qa"><h3>How do I install a stock ticker on Omarchy?</h3><p>Install Stonks with one command: <code>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span></code>. It's made for Omarchy 4.5 and runs back to 4.0.6. It asks you to confirm, then where to put the pill in the bar.</p></section>
     <section class="qa"><h3>Does Stonks need an account or an API key?</h3><p>No. Stonks works without either.</p></section>
-    <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>From Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Yahoo sends some exchanges' prices late, so Stonks marks an old price with "As of" and its time.</p></section>
-    <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. For a US stock, the large price is its newest trade, in the pre-market, after hours, or overnight for the US stocks and ETFs Robinhood trades at night. Elsewhere, a line under the price shows the pre-market or after-hours price. Through the night, until about 04:00, the day's chart keeps the day just closed with tonight's trades at its end, and the pill keeps the day's move.</p></section>
+    <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>From Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Stonks shows each price as it came, in its listing's own currency and its exchange's own time. Yahoo sends some exchanges' prices late, so a price more than two minutes old while its market trades says "As of" and its time.</p></section>
+    <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. For a US stock, the large price is its newest trade, in the pre-market, after hours, or overnight for the US stocks and ETFs Robinhood trades at night. Elsewhere, a line under the price shows the pre-market or after-hours price. Through the night, until about 04:00, the pill and your rows keep the day's move.</p></section>
     <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it.</p></section>
     <section class="qa"><h3>Does Stonks make sounds?</h3><p>Only if you turn them on: click the speaker at the top right, or press m. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at.</p></section>
-    <section class="qa"><h3>Does Stonks track my portfolio or send price alerts?</h3><p>No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings or send price alerts.</p></section>
+    <section class="qa"><h3>Does Stonks track my portfolio, send price alerts, or show news?</h3><p>No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings, send price alerts, or show news.</p></section>
     <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT license.</p></section>
   </div>
 </section>
