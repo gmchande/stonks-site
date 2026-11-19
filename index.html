@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stonks: a stock ticker and watchlist for the Omarchy bar</title>
-<meta name="description" content="Stonks puts your stocks in the Omarchy bar, each price as it traded: in its own currency, on its exchange's clock, and overnight for US stocks. Free, no API key.">
+<meta name="description" content="Stonks puts your stocks in the Omarchy bar, each price as it traded: in its own currency, on its exchange's clock, and overnight for US stocks. Free, with no API key.">
 <link rel="canonical" href="https://getstonks.app/">
 <meta name="theme-color" content="#13141c">
 <!-- PNGs, not an SVG: a tab draws 16 or 32 px, where only whole-pixel cells stay crisp.
@@ -84,7 +84,7 @@
     { "@type": "Question", "name": "Which markets does Stonks follow?",
       "acceptedAnswer": { "@type": "Answer", "text": "Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it." } },
     { "@type": "Question", "name": "Does Stonks make sounds?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Only if you turn them on: click the speaker at the top right. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Only if you turn them on with the speaker at the top right. Then adding or removing a row makes a short sound, the chart chimes as you run the pointer along it, and a soft bell rings when the market opens or closes for the stock you last looked at." } },
     { "@type": "Question", "name": "Does Stonks track my portfolio, send price alerts, or show news?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings, send price alerts, or show news." } },
     { "@type": "Question", "name": "What does Stonks cost?",
@@ -117,7 +117,7 @@
       <p class="eyebrow">A plugin for Omarchy</p>
       <h1 class="wordmark"><span class="blocks" data-text="STONKS" data-cell="16" aria-hidden="true"></span><span class="sr">Stonks</span></h1>
       <p class="lead">Your stocks in the bar, each price as it traded.</p>
-      <p class="answer">Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today. Click it for the chart and your lists. Every price is the one Yahoo or Robinhood sent, in its own currency and on its exchange's clock, with its time when it's late. It follows stocks, ETFs, indexes, and crypto, before the open, after the close, and through the night for the US stocks that trade then, with no account or API key.</p>
+      <p class="answer">Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today, and a click opens the chart and your lists. Every price is the one Yahoo or Robinhood sent, in its own currency and on its exchange's clock, with its time when it's late. Stonks follows stocks, ETFs, indexes, and crypto before the open, after the close, and through the night for the US stocks that trade then, with no account or API key.</p>
       <div class="term" data-copy>
         <div class="term-bar"><span>INSTALL</span><button type="button" class="copy">Copy</button></div>
         <pre><code><span class="prompt" aria-hidden="true">$ </span>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span><span class="cursor" aria-hidden="true"></span></code></pre>
@@ -157,7 +157,7 @@
 <section class="stage" id="bar">
   <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="2" data-cell="6" aria-hidden="true"></span><span class="sr">2</span></p>
   <h2>A pill in your bar.</h2>
-  <p class="wide">The pill shows how the stock you last looked at is doing today. Scroll over it to step through your list. Click it for the panel, right-click it for the window, and drag it to move it along the bar. Middle-click it to switch what it shows: a sparkline, an arrow, the price as text, or an icon. At night it keeps the day's move until about 04:00: point at it for tonight's.</p>
+  <p class="wide">The pill shows how the stock you last looked at is doing today. Scroll over it to step through your list. Click it for the panel, right-click it for the window, and drag it to move it along the bar. Middle-click it to switch what it shows: a sparkline, an arrow, the price as text, or an icon. At night it keeps the day's move until about 04:00, and pointing at it shows tonight's.</p>
   <div class="bar-demo">
     <div class="fake-bar" aria-hidden="true">
       <span class="ws"><b>1</b><i>2</i><i>3</i><i>4</i></span>
@@ -216,7 +216,7 @@
       </ul>
     </div>
     <figure class="share-shot">
-      <img data-look-src="img/screenshot-{look}.webp" src="img/screenshot-retro.webp" width="2400" height="1350" loading="lazy" alt="A screenshot Stonks made, in retro: SPY is at 777.56 USD at 14:55 New York time on Wednesday 7 October 2026, down 0.20% from the previous close of 779.09. The day's chart starts at midnight.">
+      <img data-look-src="img/screenshot-{look}.webp" src="img/screenshot-retro.webp" width="2400" height="1350" loading="lazy" alt="A screenshot Stonks made, in retro: SPY at 777.56 USD at 14:55 New York time on Wednesday 7 October 2026, down 0.20% from Tuesday's close of 779.09. The day's chart runs from the open at 09:30 to 14:55.">
       <figcaption>A picture Stonks made of SPY's day, from real past prices.</figcaption>
     </figure>
   </div>
@@ -340,7 +340,7 @@
     <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>From Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Stonks shows each price as it came, in its listing's own currency and its exchange's own time. Yahoo sends some exchanges' prices late, so a price more than two minutes old while its market trades says "As of" and its time.</p></section>
     <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. For a US stock, the large price is its newest trade, in the pre-market, after hours, or overnight for the US stocks and ETFs Robinhood trades at night. Elsewhere, a line under the price shows the pre-market or after-hours price. Through the night, until about 04:00, the pill and your rows keep the day's move.</p></section>
     <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it.</p></section>
-    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Only if you turn them on: click the speaker at the top right. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at.</p></section>
+    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Only if you turn them on with the speaker at the top right. Then adding or removing a row makes a short sound, the chart chimes as you run the pointer along it, and a soft bell rings when the market opens or closes for the stock you last looked at.</p></section>
     <section class="qa"><h3>Does Stonks track my portfolio, send price alerts, or show news?</h3><p>No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings, send price alerts, or show news.</p></section>
     <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT license.</p></section>
   </div>
