@@ -84,7 +84,7 @@
     { "@type": "Question", "name": "Which markets does Stonks follow?",
       "acceptedAnswer": { "@type": "Answer", "text": "Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it." } },
     { "@type": "Question", "name": "Does Stonks make sounds?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Only if you turn them on: click the speaker at the top right, or press m. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Only if you turn them on: click the speaker at the top right. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at." } },
     { "@type": "Question", "name": "Does Stonks track my portfolio, send price alerts, or show news?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings, send price alerts, or show news." } },
     { "@type": "Question", "name": "What does Stonks cost?",
@@ -128,7 +128,7 @@
     <figure class="demo-wrap">
       <div class="demo-tag" aria-hidden="true">DEMO · MADE-UP PRICES</div>
       <div class="popup" id="demo" role="group" aria-label="A demo of Stonks' panel, with made-up symbols and prices"></div>
-      <figcaption>Try it. Run the pointer along the chart to go back through the day, or click the icon at the top left to replay it. Sound starts with your first click or key, and the speaker or <kbd>m</kbd> turns it off. Press <kbd>?</kbd> for the keys.</figcaption>
+      <figcaption>Try it. Run the pointer along the chart to go back through the day, or click the icon at the top left to replay it. Sound starts with your first click or key, and the speaker turns it off. Press <kbd>?</kbd> for the keys.</figcaption>
     </figure>
   </div>
   <canvas class="skyline" aria-hidden="true"></canvas>
@@ -184,7 +184,7 @@
         <li>Adding a symbol or removing a row makes a short sound, and undoing plays the removal backwards. Taking a screenshot makes a shutter sound.</li>
         <li>A soft bell rings when the market opens or closes for the stock you last looked at. It doesn't ring while Do Not Disturb is on, every screen is off, or an app is recording from your microphone.</li>
         <li>Refreshes and prices make no sound.</li>
-        <li>Stonks starts silent. To turn sounds on, click the speaker at the top right, or press <kbd>m</kbd>. Your system volume sets how loud they are.</li>
+        <li>Stonks starts silent. To turn sounds on, click the speaker at the top right. Your system volume sets how loud they are.</li>
       </ul>
     </div>
     <div class="sound-test">
@@ -208,7 +208,7 @@
   <h2>A picture of the chart, ready to post.</h2>
   <div class="split">
     <div>
-      <p class="wide">Click the camera at the top right, or press <kbd>Ctrl+C</kbd>, for a picture of the chart you're looking at. It's sized so X shows it whole.</p>
+      <p class="wide">Click the camera at the top right for a picture of the chart you're looking at. It's sized so X shows it whole.</p>
       <ul class="plain-list">
         <li>It shows the company's name, the price and its move with the two lines under them, and the price's date, time and zone.</li>
         <li>If you've gone back through the day, it shows that moment. Your list is never in it.</li>
@@ -250,8 +250,8 @@
     <div>
       <p class="wide">All holds every symbol you follow. Your own lists, such as a portfolio or a sector, each hold some of them. Click the list's name to switch lists, start a new one, or manage them.</p>
       <ul class="plain-list">
-        <li>To find or add a stock, press <kbd>/</kbd> and type a name or a symbol. Stocks already in the list come first, then Yahoo's results.</li>
-        <li>To choose which lists a row is in, right-click it and pick "Choose lists…", Ctrl-click it, or select it and press <kbd>Ctrl+Enter</kbd>.</li>
+        <li>To find or add a stock, click "+ Find or add a symbol" or press <kbd>/</kbd>, and type a name or a symbol. Stocks already in the list come first, then Yahoo's results.</li>
+        <li>To choose which lists a row is in, right-click it and pick "Choose lists…", or Ctrl-click it.</li>
         <li>To remove a row, click the × beside its symbol, or select it and press <kbd>Delete</kbd>. Removing it from All removes it from every list.</li>
         <li>Removed one by mistake? For 5 seconds, a button such as "Undo NVDA" shows beside "+ Find or add a symbol". <kbd>Ctrl+Z</kbd> also undoes it, until you change a list again.</li>
         <li>Rows show the day's change as a percent or an amount, or the percent change since the open. To switch, click the %, ±, or bell at the end of the list's header.</li>
@@ -292,36 +292,28 @@
 <section class="stage" id="keys">
   <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="8" data-cell="6" aria-hidden="true"></span><span class="sr">8</span></p>
   <h2>Play it with the keys.</h2>
-  <p class="wide">In Stonks, <kbd>?</kbd> lists the keys you'll use every day. Here are all of them.</p>
+  <p class="wide">In Stonks, <kbd>?</kbd> lists the keys you'll use every day. Here they are, with the keys Stonks shares with Omarchy's own panels.</p>
   <dl class="moves">
     <div data-keys="ArrowUp ArrowDown"><dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move the selection</dd></div>
     <div data-keys="Enter"><dt><kbd>⏎</kbd></dt><dd>Show the selected row's chart</dd></div>
-    <div data-keys="Ctrl+enter"><dt><kbd>Ctrl+⏎</kbd></dt><dd>Choose the selected row's lists</dd></div>
-    <div data-keys="ArrowLeft ArrowRight"><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Move along the chart</dd></div>
-    <div data-keys="[ ]"><dt><kbd>[</kbd><kbd>]</kbd></dt><dd>Change the range</dd></div>
-    <div data-keys="p"><dt><kbd>p</kbd></dt><dd>Replay the chart</dd></div>
-    <div data-keys="Ctrl+c"><dt><kbd>Ctrl+C</kbd></dt><dd>Take a screenshot</dd></div>
     <div data-keys="a /"><dt><kbd>a</kbd><kbd>/</kbd></dt><dd>Find or add a symbol</dd></div>
     <div data-keys="Delete Backspace"><dt><kbd>Del</kbd><kbd>⌫</kbd></dt><dd>Remove the selected row</dd></div>
     <div data-keys="Ctrl+z"><dt><kbd>Ctrl+Z</kbd></dt><dd>Undo a removal</dd></div>
-    <div data-keys="Ctrl+arrowup Ctrl+arrowdown"><dt><kbd>Ctrl+↑↓</kbd></dt><dd>Move the selected row, in your own order</dd></div>
-    <div data-keys="o"><dt><kbd>o</kbd></dt><dd>Change the order</dd></div>
-    <div data-keys="O"><dt><kbd>Shift+O</kbd></dt><dd>Reverse the order</dd></div>
+    <div data-keys="r"><dt><kbd>r</kbd></dt><dd>Refresh the prices</dd></div>
+    <div data-keys="ArrowLeft ArrowRight"><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Move along the chart</dd></div>
+    <div data-keys="[ ]"><dt><kbd>[</kbd><kbd>]</kbd></dt><dd>Change the range</dd></div>
+    <div data-keys="s"><dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd></div>
     <div data-keys="w"><dt><kbd>w</kbd></dt><dd>Open the list menu</dd></div>
+    <div data-keys="o"><dt><kbd>o</kbd></dt><dd>Change the order</dd></div>
+    <div data-keys="?"><dt><kbd>?</kbd></dt><dd>Show the keys you'll use every day</dd></div>
+    <div data-keys="Escape"><dt><kbd>Esc</kbd></dt><dd>Close</dd></div>
+    <div data-keys="Ctrl+arrowup Ctrl+arrowdown"><dt><kbd>Ctrl+↑↓</kbd></dt><dd>Move the selected row, in your own order</dd></div>
     <div data-keys="Enter"><dt><kbd>⏎</kbd></dt><dd>Rename the selected list, in Manage lists</dd></div>
     <div data-keys="Ctrl+arrowup Ctrl+arrowdown"><dt><kbd>Ctrl+↑↓</kbd></dt><dd>Move the selected list, in Manage lists</dd></div>
     <div data-keys="Delete Backspace"><dt><kbd>Del</kbd><kbd>⌫</kbd></dt><dd>Ask to delete the selected list, in Manage lists; <kbd>⏎</kbd> deletes it</dd></div>
-    <div data-keys="c"><dt><kbd>c</kbd></dt><dd>Show the change in %, an amount or since the open</dd></div>
-    <div data-keys="s"><dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd></div>
-    <div data-keys="m"><dt><kbd>m</kbd></dt><dd>Turn sounds on or off</dd></div>
-    <div data-keys="r"><dt><kbd>r</kbd></dt><dd>Refresh</dd></div>
-    <div data-keys="U"><dt><kbd>Shift+U</kbd></dt><dd>Update Stonks when a new version is out, and restart the shell to run it</dd></div>
-    <div data-keys="b"><dt><kbd>b</kbd></dt><dd>Change how the pill looks, as a middle-click on it does (panel only)</dd></div>
     <div data-keys="Tab Shift+Tab"><dt><kbd>Tab</kbd><kbd>⇧Tab</kbd></dt><dd>Switch to the bar's next or previous panel (panel only)</dd></div>
-    <div data-keys="?"><dt><kbd>?</kbd></dt><dd>Show the keys you'll use every day</dd></div>
-    <div data-keys="Escape"><dt><kbd>Esc</kbd></dt><dd>Close</dd></div>
   </dl>
-  <p class="note"><span class="keys-only">Press a key to light up its move. <kbd>s</kbd> and <kbd>m</kbd> work on this page too. </span>The <a href="https://github.com/gmchande/omarchy-stonks#keys">README</a> has the same table.</p>
+  <p class="note"><span class="keys-only">Press a key to light up its move. <kbd>s</kbd> works on this page too. </span>The <a href="https://github.com/gmchande/omarchy-stonks#keys">README</a> has every key.</p>
 </section>
 
 <section class="stage" id="rules">
@@ -348,7 +340,7 @@
     <section class="qa"><h3>Where do Stonks' prices come from?</h3><p>From Yahoo Finance's unofficial endpoints, and overnight prices from Robinhood. Stonks shows each price as it came, in its listing's own currency and its exchange's own time. Yahoo sends some exchanges' prices late, so a price more than two minutes old while its market trades says "As of" and its time.</p></section>
     <section class="qa"><h3>Does Stonks show pre-market, after-hours, and overnight prices?</h3><p>Yes. For a US stock, the large price is its newest trade, in the pre-market, after hours, or overnight for the US stocks and ETFs Robinhood trades at night. Elsewhere, a line under the price shows the pre-market or after-hours price. Through the night, until about 04:00, the pill and your rows keep the day's move.</p></section>
     <section class="qa"><h3>Which markets does Stonks follow?</h3><p>Stocks, ETFs, indexes, and crypto, from New York to London and Tokyo. Each price stays in its listing's own currency: Stonks never converts it.</p></section>
-    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Only if you turn them on: click the speaker at the top right, or press m. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at.</p></section>
+    <section class="qa"><h3>Does Stonks make sounds?</h3><p>Only if you turn them on: click the speaker at the top right. Then adding or removing a row makes a short sound. The chart chimes as you run the pointer along it. A soft bell rings when the market opens or closes for the stock you last looked at.</p></section>
     <section class="qa"><h3>Does Stonks track my portfolio, send price alerts, or show news?</h3><p>No. Stonks shows prices and charts for the stocks you follow. It doesn't track your holdings, send price alerts, or show news.</p></section>
     <section class="qa"><h3>What does Stonks cost?</h3><p>Nothing. Stonks is free and open source, under the MIT license.</p></section>
   </div>

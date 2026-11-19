@@ -259,10 +259,7 @@
             <dt><kbd>Ctrl+Z</kbd></dt><dd>Undo a removal</dd>
             <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Move along the chart</dd>
             <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Change the range</dd>
-            <dt><kbd>p</kbd></dt><dd>Replay the chart</dd>
-            <dt><kbd>c</kbd></dt><dd>Show the change in %, an amount or since the open</dd>
             <dt><kbd>s</kbd></dt><dd>Switch between smooth and retro</dd>
-            <dt><kbd>m</kbd></dt><dd>Turn sounds on or off</dd>
             <dt><kbd>Esc</kbd></dt><dd>Close</dd>
           </dl>
         </div>` : ""}`;
@@ -708,9 +705,7 @@
         // h and l scrub too, as in Stonks' panel.
         const from = this.scrub >= 0 ? this.scrub : pts.length - 1;
         this.scrubTo(Math.max(0, Math.min(pts.length - 1, from + (k === "ArrowLeft" || k === "h" ? -1 : 1))), true);
-      } else if (k === "p") this.replay();
-      else if (k === "c") this.cycleChange();
-      else if (!this.full) handled = false;
+      } else if (!this.full) handled = false;
       else if (k === "[" || k === "]") this.stepRange(k === "[" ? -1 : 1);
       else if (k === "a" || k === "/") this.putBack();
       else if (k === "Delete" || k === "Backspace") this.remove(this.sel);
@@ -933,7 +928,6 @@
       unlight = setTimeout(() => row.classList.remove("lit"), 1600);
     }
     if (key === "s") Look.toggle();
-    if (key === "m") Sound.toggle(Look.retro, joining());
   });
 
   // ---- The speakers: the bar's and each panel's say whether sound is on,
@@ -1053,9 +1047,9 @@
   });
 
   function paintSoundState() {
-    if (!Sound.on) soundState.textContent = "Sound is off. Press m, or click the speaker, to turn it on.";
+    if (!Sound.on) soundState.textContent = "Sound is off. Click the speaker to turn it on.";
     else if (!Sound.heard) soundState.textContent = "Sound is on. It starts with your first click or key on this page.";
-    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s to hear the other look, or m to turn sound off.`;
+    else soundState.textContent = `Sound is on, in ${Look.value}'s voice. Press s to hear the other look.`;
   }
   Sound.onChange(paintSoundState);
   Look.on(() => { stripTo(-1); paintSoundState(); });

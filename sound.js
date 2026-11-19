@@ -3,7 +3,7 @@
 // chart on screen, ported from its ChartSound.js. A browser plays nothing
 // until the reader clicks, taps, or presses a key, never on a scroll, so
 // the first one starts them; until then the speaker says they're waiting,
-// and pressing it starts them. Then the speaker, or m, turns them off, and
+// and pressing it starts them. Then the speaker turns them off, and
 // the page remembers.
 window.Sound = (() => {
   "use strict";
