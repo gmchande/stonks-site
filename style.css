@@ -326,6 +326,8 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 .note { max-width: 44em; font-size: 14px; color: var(--muted); }
 
 .bar-demo { position: relative; margin: 40px 0 18px; }
+/* The hero's pill in a bar, for a phone's first screen, which has no room beside the words. */
+.hero-bar { display: none; }
 .fake-bar {
   display: flex; justify-content: space-between; align-items: center;
   height: 64px; padding: 0 22px;
@@ -553,6 +555,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
   .ws-right { display: none; }
   .pill { top: 26px; font-size: 16px; height: 38px; padding: 0 10px; left: auto; right: 0; transform: translateY(-50%); }
   .pill .arrow { font-size: 16px; }
+  .hero-bar { display: block; margin: 0 0 20px; }
   .moves, .faq { grid-template-columns: 1fr; }
   .day-sticky { padding: 12px 12px 16px; gap: 14px; }
   .popup.compact .chart { height: 170px; }

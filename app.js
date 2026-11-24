@@ -849,9 +849,10 @@
   reducedMotion.addEventListener("change", setDayMode);
   addEventListener("load", setDayMode); // a restored scroll lands mid-day
 
-  // ---- The pill: the hero's stock, in the look of the page.
+  // ---- The pill: the hero's stock, in the look of the page. On a phone
+  // the hero shows it too, and both are the one pill.
 
-  const pill = document.getElementById("pill");
+  const pills = document.querySelectorAll(".pill");
   const formButtons = document.querySelectorAll(".forms button");
   const FORMS = ["sparkline", "arrow", "text", "icon"];
   let form = "sparkline";
@@ -864,38 +865,46 @@
     const small = innerWidth <= 640;
     const change = `<span class="${t || "flat"}">${signed(q.pct, Look.retro, "%")}</span>`;
     const sym = `<span>${s.sym}</span>`;
+    let html;
     if (form === "sparkline") {
-      pill.innerHTML = `<canvas aria-hidden="true" style="width:${small ? 39 : 51}px;height:${small ? 16 : 22}px"></canvas>${sym}${change}`;
-      const { ctx, w, h } = Cells.fit(pill.querySelector("canvas"));
-      const day = Market.dayAt(s, HERO_CLOCK);
-      if (Look.retro) Cells.drawRetro(ctx, w, h, day.pts, day.base, { pixel: small ? 2 : 3, gap: 1, scrub: -1, aside: day.aside });
-      else Cells.drawSmooth(ctx, w, h, day.pts, day.base, { pad: 2, scrub: -1, lineWidth: 1.5, aside: day.aside });
+      html = `<canvas aria-hidden="true" style="width:${small ? 39 : 51}px;height:${small ? 16 : 22}px"></canvas>${sym}${change}`;
     } else if (form === "arrow") {
       const angle = Math.min(45, (Math.abs(q.pct) / 5) * 45) * Math.sign(q.pct);
-      pill.innerHTML = `<span class="arrow ${t}" aria-hidden="true" style="transform:rotate(${-angle}deg)">➜</span>${sym}${change}`;
+      html = `<span class="arrow ${t}" aria-hidden="true" style="transform:rotate(${-angle}deg)">➜</span>${sym}${change}`;
     } else if (form === "text") {
-      pill.innerHTML = `${sym}<span>${money(q.price)}</span>${change}`;
+      html = `${sym}<span>${money(q.price)}</span>${change}`;
     } else {
       // The day's animal: the bull up, the bear down, nothing on a flat day.
-      pill.innerHTML = t ? Cells.spriteSVG(Cells.sprite(t === "up", false), 2, color) : "";
+      html = t ? Cells.spriteSVG(Cells.sprite(t === "up", false), 2, color) : "";
     }
-    pill.setAttribute("aria-label", `Stonks' pill as ${{ sparkline: "a sparkline", arrow: "an arrow", text: "the price as text", icon: "an icon for the day" }[form]}, made-up prices: ${s.sym} ${signed(q.pct, false, "%")}. Click to switch what it shows.`);
+    const day = form === "sparkline" ? Market.dayAt(s, HERO_CLOCK) : null;
+    const label = `Stonks' pill as ${{ sparkline: "a sparkline", arrow: "an arrow", text: "the price as text", icon: "an icon for the day" }[form]}, made-up prices: ${s.sym} ${signed(q.pct, false, "%")}. Click to switch what it shows.`;
+    for (const pill of pills) {
+      pill.innerHTML = html;
+      pill.setAttribute("aria-label", label);
+      if (!day) continue;
+      const { ctx, w, h } = Cells.fit(pill.querySelector("canvas"));
+      if (Look.retro) Cells.drawRetro(ctx, w, h, day.pts, day.base, { pixel: small ? 2 : 3, gap: 1, scrub: -1, aside: day.aside });
+      else Cells.drawSmooth(ctx, w, h, day.pts, day.base, { pad: 2, scrub: -1, lineWidth: 1.5, aside: day.aside });
+    }
     formButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.form === form)));
   }
   const setForm = (f) => { form = f; renderPill(); };
-  pill.addEventListener("click", () => setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]));
-  pill.addEventListener("contextmenu", (e) => { e.preventDefault(); setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]); });
   let wheelSum = 0, wheelAt = 0;
-  pill.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    wheelSum += e.deltaY;
-    const now = performance.now();
-    if (Math.abs(wheelSum) < 40 || now - wheelAt < 120) return;
-    const d = wheelSum > 0 ? 1 : -1;
-    wheelSum = 0; wheelAt = now;
-    hero.sel = (hero.sym + d + hero.symbols.length) % hero.symbols.length;
-    hero.setSymbol(hero.sel);
-  }, { passive: false });
+  for (const pill of pills) {
+    pill.addEventListener("click", () => setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]));
+    pill.addEventListener("contextmenu", (e) => { e.preventDefault(); setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]); });
+    pill.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      wheelSum += e.deltaY;
+      const now = performance.now();
+      if (Math.abs(wheelSum) < 40 || now - wheelAt < 120) return;
+      const d = wheelSum > 0 ? 1 : -1;
+      wheelSum = 0; wheelAt = now;
+      hero.sel = (hero.sym + d + hero.symbols.length) % hero.symbols.length;
+      hero.setSymbol(hero.sel);
+    }, { passive: false });
+  }
   formButtons.forEach((b) => b.addEventListener("click", () => setForm(b.dataset.form)));
   hero.onRender = renderPill;
 
