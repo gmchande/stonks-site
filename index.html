@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stonks: a stock ticker and watchlist for the Omarchy bar</title>
-<meta name="description" content="Stonks puts your stocks in the Omarchy bar, each price as it traded: in its own currency, on its exchange's clock, and overnight for US stocks. Free, with no API key.">
+<title>Stonks: your stocks in the Omarchy bar, day and night</title>
+<meta name="description" content="Your stocks in the Omarchy bar, day and night. A small pill shows how one stock is doing right now, and a click opens the chart and your lists. Free, with no account or API key.">
 <link rel="canonical" href="https://getstonks.app/">
 <meta name="theme-color" content="#13141c">
 <!-- PNGs, not an SVG: a tab draws 16 or 32 px, where only whole-pixel cells stay crisp.
@@ -16,18 +16,18 @@
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Stonks">
-<meta property="og:title" content="Stonks: a stock ticker and watchlist for the Omarchy bar">
-<meta property="og:description" content="Your stocks in the Omarchy bar, each price as it traded, in its own currency and on its exchange's clock. Free, with no account or API key.">
+<meta property="og:title" content="Stonks: your stocks in the Omarchy bar, day and night">
+<meta property="og:description" content="Your stocks in the Omarchy bar, day and night. A small pill shows how one stock is doing right now, and a click opens the chart and your lists. Free, with no account or API key.">
 <meta property="og:url" content="https://getstonks.app/">
 <meta property="og:image" content="https://getstonks.app/share.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
+<meta property="og:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar, day and night. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Stonks: a stock ticker and watchlist for the Omarchy bar">
-<meta name="twitter:description" content="Your stocks in the Omarchy bar, each price as it traded, in its own currency and on its exchange's clock. Free, with no account or API key.">
+<meta name="twitter:title" content="Stonks: your stocks in the Omarchy bar, day and night">
+<meta name="twitter:description" content="Your stocks in the Omarchy bar, day and night. A small pill shows how one stock is doing right now, and a click opens the chart and your lists. Free, with no account or API key.">
 <meta name="twitter:image" content="https://getstonks.app/share.png">
-<meta name="twitter:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar. A chart a click away. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
+<meta name="twitter:image:alt" content="Stonks' logo and the words &quot;Your stocks in the Omarchy bar, day and night. Free · No account · No API key&quot;, beside its panel: a made-up stock's price over the day's chart in pixel columns.">
 
 <!-- The page's own copy of the font, asked for first, so it's there before the text is drawn
      (style.css's @font-face says why it never swaps in late). -->
@@ -116,8 +116,15 @@
     <div class="hero-copy">
       <p class="eyebrow">A plugin for Omarchy</p>
       <h1 class="wordmark"><span class="blocks" data-text="STONKS" data-cell="16" aria-hidden="true"></span><span class="sr">Stonks</span></h1>
-      <p class="lead">Your stocks in the bar, each price as it traded.</p>
-      <p class="answer">Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing today, and a click opens the chart and your lists. Every price is the one Yahoo or Robinhood sent, in its own currency and on its exchange's clock, with its time when it's late. Stonks follows stocks, ETFs, indexes, and crypto before the open, after the close, and through the night for the US stocks that trade then, with no account or API key.</p>
+      <p class="lead">Your stocks in the bar, day and night.</p>
+      <!-- On a phone, the pill in a bar, so the first screen shows Stonks; the same pill as "A pill in your bar". -->
+      <div class="bar-demo hero-bar">
+        <div class="fake-bar" aria-hidden="true">
+          <span class="ws"><b>1</b><i>2</i><i>3</i><i>4</i></span>
+        </div>
+        <button type="button" class="pill"></button>
+      </div>
+      <p class="answer">Stonks is a free stock watchlist for the Omarchy bar. A small pill shows how one stock is doing right now, and a click opens the chart and your lists. Every price is the one Yahoo or Robinhood sent, in its own currency and on its exchange's clock, with its time when it's late. Stonks follows stocks, ETFs, indexes, and crypto before the open, after the close, and through the night for the US stocks that trade then, with no account or API key.</p>
       <div class="term" data-copy>
         <div class="term-bar"><span>INSTALL</span><button type="button" class="copy">Copy</button></div>
         <pre><code><span class="prompt" aria-hidden="true">$ </span>omarchy plugin add https://github.com/gmchande/omarchy-stonks.git <span class="nw">--enable</span><span class="cursor" aria-hidden="true"></span></code></pre>
@@ -134,11 +141,31 @@
   <canvas class="skyline" aria-hidden="true"></canvas>
 </section>
 
+<section class="stage" id="bar">
+  <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="1" data-cell="6" aria-hidden="true"></span><span class="sr">1</span></p>
+  <h2>A pill in your bar.</h2>
+  <p class="wide">The pill shows how the stock you last looked at is doing today. Scroll over it to step through your list. Click it for the panel, middle-click it for the window, and drag it to move it along the bar. Right-click it to switch what it shows: a sparkline, an arrow, the price as text, or an icon. At night it keeps the day's move until about 04:00, and pointing at it shows tonight's.</p>
+  <div class="bar-demo">
+    <div class="fake-bar" aria-hidden="true">
+      <span class="ws"><b>1</b><i>2</i><i>3</i><i>4</i></span>
+      <span class="ws-right"><i></i><i></i><i></i></span>
+    </div>
+    <button type="button" class="pill"></button>
+  </div>
+  <div class="forms" role="group" aria-label="What the pill shows">
+    <button type="button" data-form="sparkline">Sparkline</button>
+    <button type="button" data-form="arrow">Arrow</button>
+    <button type="button" data-form="text">Text</button>
+    <button type="button" data-form="icon">Icon</button>
+  </div>
+  <p class="note">Here, scroll over the pill to step through the stocks, and click it to switch what it shows.</p>
+</section>
+
 <section class="day" id="day" aria-labelledby="day-title">
   <div class="stage day-head">
-    <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="1" data-cell="6" aria-hidden="true"></span><span class="sr">1</span></p>
+    <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="2" data-cell="6" aria-hidden="true"></span><span class="sr">2</span></p>
     <h2 id="day-title">A Tuesday, from pre-market to after hours.</h2>
-    <p class="note day-hint">Scroll to run the clock through a made-up day, or <a href="#bar">skip it</a>. The chart chimes as it draws, and a bell rings at the open and the close.</p>
+    <p class="note day-hint">Scroll to run the clock through a made-up day, or <a href="#sound">skip it</a>. The chart chimes as it draws, and a bell rings at the open and the close.</p>
   </div>
   <div class="day-track">
     <div class="day-sticky">
@@ -152,26 +179,6 @@
       </div>
     </div>
   </div>
-</section>
-
-<section class="stage" id="bar">
-  <p class="stage-label"><span>STAGE</span><span class="blocks" data-text="2" data-cell="6" aria-hidden="true"></span><span class="sr">2</span></p>
-  <h2>A pill in your bar.</h2>
-  <p class="wide">The pill shows how the stock you last looked at is doing today. Scroll over it to step through your list. Click it for the panel, middle-click it for the window, and drag it to move it along the bar. Right-click it to switch what it shows: a sparkline, an arrow, the price as text, or an icon. At night it keeps the day's move until about 04:00, and pointing at it shows tonight's.</p>
-  <div class="bar-demo">
-    <div class="fake-bar" aria-hidden="true">
-      <span class="ws"><b>1</b><i>2</i><i>3</i><i>4</i></span>
-      <span class="ws-right"><i></i><i></i><i></i></span>
-    </div>
-    <button type="button" class="pill" id="pill"></button>
-  </div>
-  <div class="forms" role="group" aria-label="What the pill shows">
-    <button type="button" data-form="sparkline">Sparkline</button>
-    <button type="button" data-form="arrow">Arrow</button>
-    <button type="button" data-form="text">Text</button>
-    <button type="button" data-form="icon">Icon</button>
-  </div>
-  <p class="note">Here, scroll over the pill to step through the stocks, and click it to switch what it shows.</p>
 </section>
 
 <section class="stage" id="sound">
