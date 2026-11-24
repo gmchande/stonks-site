@@ -884,8 +884,7 @@
   }
   const setForm = (f) => { form = f; renderPill(); };
   pill.addEventListener("click", () => setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]));
-  pill.addEventListener("auxclick", (e) => { if (e.button === 1) { e.preventDefault(); setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]); } });
-  pill.addEventListener("mousedown", (e) => { if (e.button === 1) e.preventDefault(); });
+  pill.addEventListener("contextmenu", (e) => { e.preventDefault(); setForm(FORMS[(FORMS.indexOf(form) + 1) % FORMS.length]); });
   let wheelSum = 0, wheelAt = 0;
   pill.addEventListener("wheel", (e) => {
     e.preventDefault();
