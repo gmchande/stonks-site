@@ -376,7 +376,7 @@ h2 { font-size: 36px; line-height: 1.15; color: var(--fg); margin: 0 0 20px; let
 /* One day: the panel held in view while the clock follows the scroll. */
 .day-head { padding-bottom: 0; }
 .day-track { position: relative; }
-.js .day-track { height: 240vh; }
+.js .day-track { height: 270vh; }
 .day-sticky {
   position: sticky; top: 44px; height: calc(100svh - 44px);
   display: flex; align-items: center; justify-content: center; gap: 64px; padding: 24px;

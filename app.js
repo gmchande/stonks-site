@@ -768,11 +768,12 @@
   const dayPop = new Popup(document.getElementById("daypop"), { symbols: [Market.SYMBOLS[0]], clock: Market.PRE, full: false, holdScale: true });
   const clockDigits = daySection.querySelector(".clock-digits");
   const track = daySection.querySelector(".day-track");
-  const WHOLE_DAY = 21 * 60;
-  // Scroll to clock: each part of the day gets its share of the scroll.
+  const LAST = 23 * 60 + 55;
+  // Scroll to clock: each part of the day, and the night after it, gets
+  // its share of the scroll.
   const STOPS = [
-    [0, 4 * 60], [0.12, 9 * 60 + 25], [0.16, 9 * 60 + 30], [0.24, 10 * 60], [0.34, 12 * 60],
-    [0.44, 13 * 60], [0.54, 15 * 60], [0.66, 15 * 60 + 55], [0.72, 16 * 60], [0.86, 20 * 60], [1, WHOLE_DAY],
+    [0, 4 * 60], [0.107, 9 * 60 + 25], [0.142, 9 * 60 + 30], [0.213, 10 * 60], [0.302, 12 * 60],
+    [0.391, 13 * 60], [0.48, 15 * 60], [0.587, 15 * 60 + 55], [0.64, 16 * 60], [0.764, 20 * 60], [1, LAST],
   ];
   function clockFor(p) {
     for (let i = 1; i < STOPS.length; i++) {
@@ -780,7 +781,7 @@
       const [p1, m1] = STOPS[i];
       if (p <= p1) return Math.round(m0 + ((m1 - m0) * (p - p0)) / (p1 - p0));
     }
-    return WHOLE_DAY;
+    return LAST;
   }
   let dayCell = 0;
   function paintClock() {
@@ -842,7 +843,7 @@
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#"]')) linkScroll = performance.now() + 1500; });
   function setDayMode() {
     daySection.classList.toggle("still", reducedMotion.matches);
-    if (reducedMotion.matches) dayPop.setClock(WHOLE_DAY);
+    if (reducedMotion.matches) dayPop.setClock(LAST);
     else followScroll();
   }
   addEventListener("scroll", () => { if (!dayFrame) dayFrame = requestAnimationFrame(followScroll); }, { passive: true });
@@ -1038,7 +1039,7 @@
   // sound on a pad of its own, in the page's look's voice.
 
   const strip = document.querySelector("#sound .chimes");
-  const stripDay = Market.dayAt(Market.SYMBOLS[0], WHOLE_DAY);
+  const stripDay = Market.dayAt(Market.SYMBOLS[0], Market.POST_END);
   const stripPts = stripDay.pts;
   const soundState = document.querySelector(".sound-state");
   let stripScrub = -1, stripReveal = 1, stripChart = null, stripChimed = -1, stopStrip = null;
