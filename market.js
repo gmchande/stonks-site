@@ -1,9 +1,11 @@
 // The made-up market every panel on the page draws, and the words Stonks
 // puts on it: a Tuesday in New York, in minutes since its midnight, the
-// Monday before it, a day earlier, and Tuesday night until midnight, which
-// every made-up stock trades, as the US stocks Robinhood trades at night
-// do. The phases, their names, and the header's words follow Stonks'
-// Market.js; the prices are made up, the same on every visit.
+// Monday before it, a day earlier, and Tuesday night until midnight. Every
+// made-up stock trades Tuesday night, as the US stocks Robinhood trades at
+// night do, but none traded Monday night, so as in Stonks it shows a night
+// only from tonight's first trade: until then it's closed. The phases,
+// their names, and the header's words follow Stonks' Market.js; the prices
+// are made up, the same on every visit.
 window.Market = (() => {
   "use strict";
 
@@ -23,7 +25,6 @@ window.Market = (() => {
       return "open";
     }
     if (m >= CLOSE && m < POST_END) return "post";
-    if (m >= POST_END) return "overnight";
     return "closed";
   }
   const trading = (phase) => ["opening", "open", "lunch", "power", "closing"].includes(phase);
@@ -40,9 +41,10 @@ window.Market = (() => {
     return `${h}h${r ? ` ${pad2(r)}m` : ""}`;
   }
 
-  // The header's top line at clock `m` (Market.marketStatus).
-  function status(m) {
-    const phase = phaseAt(m);
+  // The header's top line at clock `m` (Market.marketStatus), `night` once
+  // tonight has traded.
+  function status(m, night) {
+    const phase = night ? "overnight" : phaseAt(m);
     if (trading(phase)) {
       const named = phase !== "open";
       return `${named ? `${PHASES[phase]} · closes in` : "Market closes in"} ${duration(CLOSE - m)}`;
@@ -88,14 +90,15 @@ window.Market = (() => {
     return prints;
   }
 
-  // Tonight's trade, from 20:00 to midnight, thinner still: a print per
-  // five minutes on most bars, from Tuesday's close `close` by `anchors`.
+  // Tonight's trade, from its first anchor, its first trade, to midnight,
+  // thinner still: a print per five minutes on most bars, from Tuesday's
+  // close `close` by `anchors`.
   function makeNight(close, anchors, seed) {
     const r = rng(seed);
     const prints = [];
     let noise = 0;
-    for (let m = POST_END; m < DAY; m += 5) {
-      if (r() < 0.3) continue;
+    for (let m = anchors[0][0]; m < DAY; m += 5) {
+      if (m > anchors[0][0] && r() < 0.3) continue;
       noise = noise * 0.6 + (r() - 0.5) * 0.12;
       prints.push({ m, ext: true, night: true, v: round2(close * (1 + (interp(anchors, m) + noise) / 100)) });
     }
@@ -113,7 +116,7 @@ window.Market = (() => {
       [240, 0.1], [330, 0.35], [450, 0.2], [565, 0.45], [600, 0.85], [660, 0.35], [700, -0.45], [750, -1.05],
       [790, -0.4], [840, 1.25], [885, 0.61], [905, 0.2], [930, -0.3], [955, -0.42], [1000, -0.55], [1100, -0.4], [1195, -0.5]],
     monday: [[240, 0.1], [570, 0.3], [620, 1.2], [700, 1.6], [780, 1.05], [850, 1.9], [910, 1.3], [955, 0.85], [1000, 0.95], [1100, 0.8], [1195, 0.9]],
-    night: [[1200, 0.05], [1250, 0.3], [1300, 0.15], [1370, 0.5], [1435, 0.65]] },
+    night: [[1235, 0.12], [1270, 0.3], [1310, 0.15], [1370, 0.5], [1435, 0.65]] },
     { sym: "PIXELS", name: "Pixel Foundry Co", prev: 88.42, seed: 11, vol: 9.37e6, shares: 1.27e9, eps: 2.41, anchors: [
       [240, -0.1], [565, 0.3], [600, 0.45], [700, -0.3], [800, -0.9], [885, -1.42], [955, -1.6], [1195, -1.5]],
     monday: [[240, 0.05], [570, -0.2], [650, -0.9], [760, -0.35], [860, -1.1], [955, -0.6], [1195, -0.55]],
@@ -155,8 +158,8 @@ window.Market = (() => {
   function quoteAt(s, now) {
     const prints = s.prints.filter((p) => p.m < now);
     const regular = prints.filter((p) => !p.ext);
-    const phase = phaseAt(now);
     const newest = prints.length ? prints[prints.length - 1] : s.monday[s.monday.length - 1];
+    const phase = newest.night ? "overnight" : phaseAt(now);
     let base = s.prev, name = "TODAY", close = { label: "MON CLOSE", v: s.prev, from: null, since: false };
     if (!prints.length) {
       base = s.fri;
@@ -181,7 +184,7 @@ window.Market = (() => {
       volume: s.vol * (regular.length / s.prints.filter((p) => !p.ext).length),
       high: regular.length ? Math.max(...prints.map((p) => p.v)) : null,
       asleep: phase === "closed",
-      status: status(now),
+      status: status(now, !!newest.night),
     };
   }
 
