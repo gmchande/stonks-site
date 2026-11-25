@@ -4,9 +4,11 @@
 <meta charset="utf-8">
 <title>Stonks share image</title>
 <!-- The source of ../share.png. Render it with tools/render-share.sh. -->
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 <style>
+  /* The site's own JetBrains Mono, held back until it loads rather than drawn
+     in a fallback; fonts.js marks whether every weight loaded. */
+  @font-face { font-family: "JetBrains Mono"; font-weight: 100 800; font-display: block; src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2"); }
   html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
   body { position: relative; background: var(--bg); }
   .scatter { position: absolute; inset: 0; width: 1200px; height: 630px; }
@@ -64,5 +66,6 @@
     if (r() < Math.pow(edge, 6) * 0.6) { sc.ctx.fillStyle = Cells.rgba(COL.accent, 0.06 + r() * 0.12); sc.ctx.fillRect(x, y, 12, 12); }
   }
 </script>
+<script src="fonts.js"></script>
 </body>
 </html>
