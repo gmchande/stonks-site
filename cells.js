@@ -240,9 +240,10 @@ window.Cells = (() => {
 
   // The retro chart, as Stonks' PixelChart draws it: a faint grid, the
   // baseline as every other cell, a stem from each cap to the baseline at
-  // the wash's alpha, the cap at full color; extended hours dimmer. The
-  // columns left of `o.aside`, the share of the width the move doesn't
-  // count, draw fainter, their stems every other cell.
+  // the wash's alpha, the cap at full color; extended hours dimmer, but
+  // tonight's, the session trading now. The columns left of `o.aside`, the
+  // share of the width the move doesn't count, draw fainter, their stems
+  // every other cell.
   // `o.scale` is the points' value range when it must hold still while
   // the points fill in. Returns the grid it drew, which the chimes play.
   function drawRetro(ctx, w, h, pts, base, o) {
@@ -264,12 +265,12 @@ window.Cells = (() => {
       ctx.fillRect(c * pitch, top, pixel, Math.min(h, (baseRow + 2) * pixel) - top);
     }
     const levels = [];
-    const ext = [];
+    const dim = [];
     const colOf = (p) => Math.min(cols - 1, Math.floor(p.x * cols));
     for (const p of pts) {
       const c = colOf(p);
       levels[c] = Math.round(norm(p.v) * (rows - 1));
-      ext[c] = !!p.ext;
+      dim[c] = !!p.ext && !p.night;
     }
     // A column shows its last print, but a marked high or low print shows itself.
     for (const m of o.marks || []) if (pts[m.i].v === m.v) levels[colOf(pts[m.i])] = Math.round(norm(m.v) * (rows - 1));
@@ -281,7 +282,7 @@ window.Cells = (() => {
       if (lv === undefined) continue;
       const color = lv <= baseRow ? COL.up : COL.down;
       const aside = c < asideCols;
-      const ink = aside ? 0.4 : ext[c] ? 0.45 : 1;
+      const ink = aside ? 0.4 : dim[c] ? 0.45 : 1;
       const y = lv * pixel;
       const top = Math.min(y, baseY);
       const hh = Math.abs(y - baseY);
@@ -316,9 +317,10 @@ window.Cells = (() => {
   }
 
   // The smooth chart: one line in the day's colors either side of the
-  // baseline, a wash under it, a dashed baseline; extended hours dimmer.
-  // Left of `o.aside`, the share of the width the move doesn't count, the
-  // line draws fainter and half as thick, with no wash.
+  // baseline, a wash under it, a dashed baseline; extended hours dimmer, but
+  // tonight's, the session trading now. Left of `o.aside`, the share of the
+  // width the move doesn't count, the line draws fainter and half as thick,
+  // with no wash.
   // Returns its points' heights, 0 at the top, which the chimes play.
   function drawSmooth(ctx, w, h, pts, base, o) {
     if (!pts.length) return;
@@ -340,12 +342,13 @@ window.Cells = (() => {
     ctx.restore();
 
     const clipW = o.reveal == null || o.reveal >= 1 ? w : X(o.reveal);
-    // Runs of regular and extended prints, each joined to the next.
+    // Runs of bright and dim prints, each joined to the next.
     const runs = [];
     pts.forEach((p, i) => {
       const last = runs[runs.length - 1];
-      if (!last || last.ext !== !!p.ext) {
-        const run = { ext: !!p.ext, pts: i ? [pts[i - 1]] : [] };
+      const dim = !!p.ext && !p.night;
+      if (!last || last.dim !== dim) {
+        const run = { dim, pts: i ? [pts[i - 1]] : [] };
         runs.push(run);
       }
       runs[runs.length - 1].pts.push(p);
@@ -358,7 +361,7 @@ window.Cells = (() => {
       area.lineTo(X(run.pts[run.pts.length - 1].x), by);
       area.lineTo(X(run.pts[0].x), by);
       area.closePath();
-      const a = run.ext ? 0.45 : 1;
+      const a = run.dim ? 0.45 : 1;
       for (const [color, y0, y1] of [[COL.up, 0, by], [COL.down, by, h]]) {
         for (const [x0, x1, aside] of [[0, Math.min(asideX, clipW), true], [asideX, clipW, false]]) {
           if (x1 <= x0) continue;
