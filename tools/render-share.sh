@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Renders tools/share-card.html to share.png (1200 x 630), the image a
-# shared link shows. Needs Chromium and ImageMagick. The icons (img/bull.svg,
-# favicon-*.png, icon-192.png, apple-touch-icon.png) come from the logo set
-# in Stonks' out/design/logo, drawn there in whole cells at each size.
+# shared link shows. Needs Chromium, Python, curl and ImageMagick;
+# tools/shoot.sh takes the shot. The icons (img/bull.svg, favicon-*.png,
+# icon-192.png, apple-touch-icon.png) come from the logo set in Stonks'
+# out/design/logo, drawn there in whole cells at each size.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-port=8799
-python3 -m http.server "$port" --bind 127.0.0.1 >/dev/null 2>&1 &
-server=$!
-trap 'kill "$server"' EXIT
-sleep 1
-chromium --headless=new --disable-gpu --hide-scrollbars --window-size=1200,630 \
-  --virtual-time-budget=4000 --screenshot=share.png "http://127.0.0.1:$port/tools/share-card.html" 2>/dev/null
+# The page is served as /site/tools/share-card.html, so the site isn't
+# written to until the shot is taken.
+root=$(mktemp -d)
+ln -s "$PWD" "$root/site"
+trap 'rm -r "$root"' EXIT
+tools/shoot.sh "$root" site/tools/share-card.html 1200 630 1 share.png
 magick share.png -strip -define png:compression-level=9 share.png
 identify share.png
